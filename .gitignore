@@ -1,0 +1,9 @@
+# ---> Beef
+build/
+recovery/
+dist/
+BeefSpace_User.toml
+
+example/BeefSpace_User.toml
+example/build/
+example/recovery/
