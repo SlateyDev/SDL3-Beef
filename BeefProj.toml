@@ -1,4 +1,5 @@
 FileVersion = 1
+Dependencies = {corlib = "*", corlib = "*"}
 
 [Project]
 Name = "SDL3"
@@ -6,16 +7,14 @@ TargetType = "BeefLib"
 StartupObject = "SDL3.Program"
 
 [Configs.Debug.Win64]
-LibPaths = ["$(ProjectDir)/dist/SDL3.dll"]
+LibPaths = ["$(ProjectDir)/dist/SDL3.lib"]
 PostBuildCmds = ["CopyToDependents(\"$(ProjectDir)/dist/*.dll\")"]
 
 [Configs.Debug.Linux64]
 OtherLinkFlags = "$(LinkFlags) -lSDL3"
 
-
-
 [Configs.Release.Win64]
-LibPaths = ["$(ProjectDir)/dist/SDL3.dll"]
+LibPaths = ["$(ProjectDir)/dist/SDL3.lib"]
 PostBuildCmds = ["CopyToDependents(\"$(ProjectDir)/dist/*.dll\")"]
 
 [Configs.Release.Linux64]
