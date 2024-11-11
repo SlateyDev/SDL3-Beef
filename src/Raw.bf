@@ -2365,6 +2365,8 @@ static
 		public uint8 padding3;
 	}
 
+	[CLink] public static extern c_bool SDL_CancelGPUCommandBuffer(SDL_GPUCommandBuffer* command_buffer);
+
 	[CLink] public static extern c_bool SDL_GPUSupportsShaderFormats(SDL_GPUShaderFormat format_flags, c_char* name);
 
 	[CLink] public static extern c_bool SDL_GPUSupportsProperties(SDL_PropertiesID props);
@@ -3062,6 +3064,10 @@ static
 		SDL_IO_STATUS_READONLY, /**< Tried to write a read-only buffer */
 		SDL_IO_STATUS_WRITEONLY /**< Tried to read a write-only buffer */
 	}
+
+ 	[CLink] public static extern c_bool SDL_SaveFile_IO(SDL_IOStream* src, void* data, c_size datasize, c_bool closeio);
+
+  	[CLink] public static extern c_bool SDL_SaveFile(c_char* file, void* data, c_size datasize);
 
 	[CLink] public static extern SDL_IOStream* SDL_IOFromFile(c_char* file, c_char* mode);
 
