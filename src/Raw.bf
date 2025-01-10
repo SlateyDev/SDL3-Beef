@@ -1576,7 +1576,7 @@ static
 		public uint32 num_readonly_storage_textures; /**< The number of readonly storage textures defined in the shader. */
 		public uint32 num_readonly_storage_buffers; /**< The number of readonly storage buffers defined in the shader. */
 		public uint32 num_readwrite_storage_textures; /**< The number of read-write storage textures defined in the shader. */
-		public int32 num_readwrite_storage_buffers; /**< The number of read-write storage buffers defined in the shader. */
+		public uint32 num_readwrite_storage_buffers; /**< The number of read-write storage buffers defined in the shader. */
 		public uint32 num_uniform_buffers; /**< The number of uniform buffers defined in the shader. */
 		public uint32 threadcount_x; /**< The number of threads in the X dimension. This should match the value in the shader. */
 		public uint32 threadcount_y; /**< The number of threads in the Y dimension. This should match the value in the shader. */
