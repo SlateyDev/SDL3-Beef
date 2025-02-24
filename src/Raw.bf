@@ -5,6 +5,7 @@ using System.Interop;
 
 static
 {
+
 	//SDL_assert.h
 
 	public enum SDL_AssertState : c_int
@@ -34,13 +35,68 @@ static
 
 	[CLink] public static extern void SDL_SetAssertionHandler(SDL_AssertionHandler handler, void* userdata);
 
-	[CLink] public static extern SDL_AssertionHandler SDL_GetDefaultAssertionHandler();
+	 [CLink] public static extern SDL_AssertionHandler SDL_GetDefaultAssertionHandler();
 
-	[CLink] public static extern SDL_AssertionHandler SDL_GetAssertionHandler(void** puserdata);
+	 [CLink] public static extern SDL_AssertionHandler SDL_GetAssertionHandler(void** puserdata);
 
-	[CLink] public static extern SDL_AssertData* SDL_GetAssertionReport();
+	 [CLink] public static extern SDL_AssertData* SDL_GetAssertionReport();
 
-	[CLink] public static extern void SDL_ResetAssertionReport();
+	 [CLink] public static extern void SDL_ResetAssertionReport();
+
+	//SDL_asyncio.h
+
+	public struct SDL_AsyncIO;
+
+	public enum SDL_AsyncIOTaskType : c_int
+	{
+		SDL_ASYNCIO_TASK_READ,
+		SDL_ASYNCIO_TASK_WRITE,
+		SDL_ASYNCIO_TASK_CLOSE
+	}
+
+	public enum SDL_AsyncIOResult : c_int
+	{
+		SDL_ASYNCIO_COMPLETE,
+		SDL_ASYNCIO_FAILURE,
+		SDL_ASYNCIO_CANCELED
+	}
+
+	[CRepr]
+	public struct SDL_AsyncIOOutcome
+	{
+		public SDL_AsyncIO* asyncio;
+		public SDL_AsyncIOTaskType type;
+		public SDL_AsyncIOResult result;
+		public void* buffer;
+		public uint64 offset;
+		public uint64 bytes_requested;
+		public uint64 bytes_transferred;
+		public void* userdata;
+	}
+
+	public struct SDL_AsyncIOQueue;
+
+	 [CLink] public static extern SDL_AsyncIO* SDL_AsyncIOFromFile(c_char* file, c_char* mode);
+
+	 [CLink] public static extern int64 SDL_GetAsyncIOSize(SDL_AsyncIO* asyncio);
+
+	 [CLink] public static extern c_bool SDL_ReadAsyncIO(SDL_AsyncIO* asyncio, void* ptr, uint64 offset, uint64 size, SDL_AsyncIOQueue* queue, void* userdata);
+
+	 [CLink] public static extern c_bool SDL_WriteAsyncIO(SDL_AsyncIO* asyncio, void* ptr, uint64 offset, uint64 size, SDL_AsyncIOQueue* queue, void* userdata);
+
+	 [CLink] public static extern c_bool SDL_CloseAsyncIO(SDL_AsyncIO* asyncio, c_bool flush, SDL_AsyncIOQueue* queue, void* userdata);
+
+	 [CLink] public static extern SDL_AsyncIOQueue* SDL_CreateAsyncIOQueue();
+
+	 [CLink] public static extern void SDL_DestroyAsyncIOQueue(SDL_AsyncIOQueue* queue);
+
+	 [CLink] public static extern c_bool SDL_GetAsyncIOResult(SDL_AsyncIOQueue* queue, SDL_AsyncIOOutcome* outcome);
+
+	 [CLink] public static extern c_bool SDL_WaitAsyncIOResult(SDL_AsyncIOQueue* queue, SDL_AsyncIOOutcome* outcome, c_int timeoutMS);
+
+	 [CLink] public static extern void SDL_SignalAsyncIOQueue(SDL_AsyncIOQueue* queue);
+
+	 [CLink] public static extern c_bool SDL_LoadFileAsync(c_char* file, SDL_AsyncIOQueue* queue, void* userdata);
 
 	//SDL_atomic.h
 
@@ -58,46 +114,117 @@ static
 		public uint32 value;
 	}
 
-	[CLink] public static extern c_bool SDL_TryLockSpinlock(SDL_SpinLock* lock);
+	 [CLink] public static extern c_bool SDL_TryLockSpinlock(SDL_SpinLock* lock);
 
-	[CLink] public static extern void SDL_LockSpinlock(SDL_SpinLock* lock);
+	 [CLink] public static extern void SDL_LockSpinlock(SDL_SpinLock* lock);
 
-	[CLink] public static extern void SDL_UnlockSpinlock(SDL_SpinLock* lock);
+	 [CLink] public static extern void SDL_UnlockSpinlock(SDL_SpinLock* lock);
 
-	[CLink] public static extern void SDL_MemoryBarrierReleaseFunction();
+	 [CLink] public static extern void SDL_MemoryBarrierReleaseFunction();
 
-	[CLink] public static extern void SDL_MemoryBarrierAcquireFunction();
+	public static void SDL_MemoryBarrierRelease() => SDL_MemoryBarrierReleaseFunction();
 
-	[CLink] public static extern c_bool SDL_CompareAndSwapAtomicInt(SDL_AtomicInt* a, c_int oldval, c_int newval);
+	 [CLink] public static extern void SDL_MemoryBarrierAcquireFunction();
 
-	[CLink] public static extern c_int SDL_SetAtomicInt(SDL_AtomicInt* a, c_int v);
+	public static void SDL_MemoryBarrierAcquire() => SDL_MemoryBarrierAcquireFunction();
 
-	[CLink] public static extern c_int SDL_GetAtomicInt(SDL_AtomicInt* a);
+	 [CLink] public static extern c_bool SDL_CompareAndSwapAtomicInt(SDL_AtomicInt* a, c_int oldval, c_int newval);
 
-	[CLink] public static extern c_int SDL_AddAtomicInt(SDL_AtomicInt* a, c_int v);
+	 [CLink] public static extern c_int SDL_SetAtomicInt(SDL_AtomicInt* a, c_int v);
 
-	[CLink] public static extern c_bool SDL_CompareAndSwapAtomicU32(SDL_AtomicU32* a, uint32 oldval, uint32 newval);
+	 [CLink] public static extern c_int SDL_GetAtomicInt(SDL_AtomicInt* a);
 
-	[CLink] public static extern uint32 SDL_SetAtomicU32(SDL_AtomicU32* a, uint32 v);
+	 [CLink] public static extern c_int SDL_AddAtomicInt(SDL_AtomicInt* a, c_int v);
 
-	[CLink] public static extern uint32 SDL_GetAtomicU32(SDL_AtomicU32* a);
+	 [CLink] public static extern c_bool SDL_CompareAndSwapAtomicU32(SDL_AtomicU32* a, uint32 oldval, uint32 newval);
 
-	[CLink] public static extern c_bool SDL_CompareAndSwapAtomicPointer(void** a, void* oldval, void* newval);
+	 [CLink] public static extern uint32 SDL_SetAtomicU32(SDL_AtomicU32* a, uint32 v);
 
-	[CLink] public static extern void*  SDL_SetAtomicPointer(void** a, void* v);
+	 [CLink] public static extern uint32 SDL_GetAtomicU32(SDL_AtomicU32* a);
 
-	[CLink] public static extern void*  SDL_GetAtomicPointer(void** a);
+	 [CLink] public static extern c_bool SDL_CompareAndSwapAtomicPointer(void** a, void* oldval, void* newval);
+
+	 [CLink] public static extern void*  SDL_SetAtomicPointer(void** a, void* v);
+
+	 [CLink] public static extern void*  SDL_GetAtomicPointer(void** a);
+
+	public static c_int SDL_AtomicIncRef(SDL_AtomicInt* a) => SDL_AddAtomicInt(a, 1);
+
+	public static c_bool SDL_AtomicDecRef(SDL_AtomicInt* a) => (SDL_AddAtomicInt(a, -1) == 1);
 
 	//SDL_audio.h
+	public typealias SDL_AudioStreamCallback = function void(void* userdata, SDL_AudioStream* stream, c_int additional_amount, c_int total_amount);
+
+	public const uint32 SDL_AUDIO_MASK_BITSIZE = (0xFFu);
+
+	public const uint32 SDL_AUDIO_MASK_FLOAT = (1u << 8);
+
+	public const uint32 SDL_AUDIO_MASK_BIG_ENDIAN = (1u << 12);
+
+	public const uint32 SDL_AUDIO_MASK_SIGNED = (1u << 15);
+
+	public static SDL_AudioFormat SDL_DEFINE_AUDIO_FORMAT(bool signed, c_bool bigendian, c_bool flt, uint32 size)
+	{
+		return (SDL_AudioFormat)(((uint16)(signed ? 1 : 0) << 15) | ((uint16)(bigendian ? 1 : 0) << 12) | ((uint16)(flt ? 1 : 0) << 8) | ((size) & SDL_AUDIO_MASK_BITSIZE));
+	}
+
+	public static uint32 SDL_AUDIO_BITSIZE(SDL_AudioFormat x)
+	{
+		return (uint32)((x) & (SDL_AudioFormat)SDL_AUDIO_MASK_BITSIZE);
+	}
+
+	public static uint32 SDL_AUDIO_BYTESIZE(SDL_AudioFormat x)
+	{
+		return ((uint32)SDL_AUDIO_BITSIZE(x) / 8);
+	}
+
+	public static c_bool SDL_AUDIO_ISFLOAT(SDL_AudioFormat x)
+	{
+		return ((x) & (SDL_AudioFormat)SDL_AUDIO_MASK_FLOAT) != 0;
+	}
+
+	public static c_bool SDL_AUDIO_ISBIGENDIAN(SDL_AudioFormat x)
+	{
+		return ((x) & (SDL_AudioFormat)SDL_AUDIO_MASK_BIG_ENDIAN) != 0;
+	}
+
+	public static c_bool SDL_AUDIO_ISLITTLEENDIAN(SDL_AudioFormat x)
+	{
+		return (!SDL_AUDIO_ISBIGENDIAN(x));
+	}
+
+	public static c_bool SDL_AUDIO_ISSIGNED(SDL_AudioFormat x)
+	{
+		return ((x) & (SDL_AudioFormat)SDL_AUDIO_MASK_SIGNED) != 0;
+	}
+
+	public static c_bool SDL_AUDIO_ISINT(SDL_AudioFormat x)
+	{
+		return (!SDL_AUDIO_ISFLOAT(x));
+	}
+
+	public static c_bool SDL_AUDIO_ISUNSIGNED(SDL_AudioFormat x)
+	{
+		return (!SDL_AUDIO_ISSIGNED(x));
+	}
+
+	public const uint32 SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK = ((SDL_AudioDeviceID)0xFFFFFFFF);
+
+	public const uint32 SDL_AUDIO_DEVICE_DEFAULT_RECORDING = ((SDL_AudioDeviceID)0xFFFFFFFE);
 
 	public typealias SDL_AudioDeviceID = uint32;
 
 	[CRepr]
 	public struct SDL_AudioSpec
 	{
-		SDL_AudioFormat format; /**< Audio data format */
-		c_int channels; /**< Number of channels: 1 mono, 2 stereo, etc */
-		c_int freq; /**< sample rate: sample frames per second */
+		public SDL_AudioFormat format; /**< Audio data format */
+		public c_int channels; /**< Number of channels: 1 mono, 2 stereo, etc */
+		public c_int freq; /**< sample rate: sample frames per second */
+	}
+
+	public static uint32 SDL_AUDIO_FRAMESIZE(SDL_AudioSpec x)
+	{
+		return (SDL_AUDIO_BYTESIZE((x).format) * (uint32)((x).channels));
 	}
 
 	[AllowDuplicates]
@@ -122,129 +249,134 @@ static
 			/* SDL_DEFINE_AUDIO_FORMAT(1, 1, 1, 32), */
 
 		/* These represent the current system's byteorder. */
+		#if !BIGENDIAN //SDL_BYTEORDER == SDL_LIL_ENDIAN
 		SDL_AUDIO_S16 = SDL_AUDIO_S16LE,
 		SDL_AUDIO_S32 = SDL_AUDIO_S32LE,
 		SDL_AUDIO_F32 = SDL_AUDIO_F32LE
-		/* Incase of big endian
+		#else
 		SDL_AUDIO_S16 = SDL_AUDIO_S16BE,
 		SDL_AUDIO_S32 = SDL_AUDIO_S32BE,
 		SDL_AUDIO_F32 = SDL_AUDIO_F32BE
-		*/
+		#endif
 	}
 
 	public struct SDL_AudioStream;
-
-	public typealias SDL_AudioStreamCallback = function void(void* userdate, SDL_AudioStream* stream, c_int additional_amount, c_int total_amount);
 
 	public typealias SDL_AudioPostmixCallback = function void(void* userdate, SDL_AudioSpec* spec, float* buffer, c_int buflen);
 
 	public struct SDL_IOStream;
 
-	[CLink] public static extern c_int SDL_GetNumAudioDrivers();
+	 [CLink] public static extern c_bool SDL_IsAudioDevicePhysical(SDL_AudioDeviceID devid);
 
-	[CLink] public static extern c_char* SDL_GetAudioDriver(c_int index);
+	 [CLink] public static extern c_bool SDL_IsAudioDevicePlayback(SDL_AudioDeviceID devid);
 
-	[CLink] public static extern c_char* SDL_GetCurrentAudioDriver();
+	 [CLink] public static extern c_int SDL_GetNumAudioDrivers();
 
-	[CLink] public static extern SDL_AudioDeviceID*  SDL_GetAudioPlaybackDevices(c_int* count);
+	 [CLink] public static extern c_char* SDL_GetAudioDriver(c_int index);
 
-	[CLink] public static extern SDL_AudioDeviceID* SDL_GetAudioRecordingDevices(c_int* count);
+	 [CLink] public static extern c_char* SDL_GetCurrentAudioDriver();
 
-	[CLink] public static extern c_char* SDL_GetAudioDeviceName(SDL_AudioDeviceID devid);
+	 [CLink] public static extern SDL_AudioDeviceID*  SDL_GetAudioPlaybackDevices(c_int* count);
 
-	[CLink] public static extern c_bool SDL_GetAudioDeviceFormat(SDL_AudioDeviceID devid, SDL_AudioSpec* spec, c_int* sample_frames);
+	 [CLink] public static extern SDL_AudioDeviceID* SDL_GetAudioRecordingDevices(c_int* count);
 
-	[CLink] public static extern c_int*  SDL_GetAudioDeviceChannelMap(SDL_AudioDeviceID devid, c_int* count);
+	 [CLink] public static extern c_char* SDL_GetAudioDeviceName(SDL_AudioDeviceID devid);
 
-	[CLink] public static extern SDL_AudioDeviceID SDL_OpenAudioDevice(SDL_AudioDeviceID devid, SDL_AudioSpec* spec);
+	 [CLink] public static extern c_bool SDL_GetAudioDeviceFormat(SDL_AudioDeviceID devid, SDL_AudioSpec* spec, c_int* sample_frames);
 
-	[CLink] public static extern c_bool SDL_PauseAudioDevice(SDL_AudioDeviceID dev);
+	 [CLink] public static extern c_int*  SDL_GetAudioDeviceChannelMap(SDL_AudioDeviceID devid, c_int* count);
 
-	[CLink] public static extern c_bool SDL_ResumeAudioDevice(SDL_AudioDeviceID dev);
+	 [CLink] public static extern SDL_AudioDeviceID SDL_OpenAudioDevice(SDL_AudioDeviceID devid, SDL_AudioSpec* spec);
 
-	[CLink] public static extern c_bool SDL_AudioDevicePaused(SDL_AudioDeviceID dev);
+	 [CLink] public static extern c_bool SDL_PauseAudioDevice(SDL_AudioDeviceID dev);
 
-	[CLink] public static extern float SDL_GetAudioDeviceGain(SDL_AudioDeviceID devid);
+	 [CLink] public static extern c_bool SDL_ResumeAudioDevice(SDL_AudioDeviceID dev);
 
-	[CLink] public static extern c_bool SDL_SetAudioDeviceGain(SDL_AudioDeviceID devid, float gain);
+	 [CLink] public static extern c_bool SDL_AudioDevicePaused(SDL_AudioDeviceID dev);
 
-	[CLink] public static extern void SDL_CloseAudioDevice(SDL_AudioDeviceID devid);
+	 [CLink] public static extern float SDL_GetAudioDeviceGain(SDL_AudioDeviceID devid);
 
-	[CLink] public static extern c_bool SDL_BindAudioStreams(SDL_AudioDeviceID devid, SDL_AudioStream** streams, c_int num_streams);
+	 [CLink] public static extern c_bool SDL_SetAudioDeviceGain(SDL_AudioDeviceID devid, float gain);
 
-	[CLink] public static extern c_bool SDL_BindAudioStream(SDL_AudioDeviceID devid, SDL_AudioStream* stream);
+	 [CLink] public static extern void SDL_CloseAudioDevice(SDL_AudioDeviceID devid);
 
-	[CLink] public static extern void SDL_UnbindAudioStreams(SDL_AudioStream** streams, c_int num_streams);
+	 [CLink] public static extern c_bool SDL_BindAudioStreams(SDL_AudioDeviceID devid, SDL_AudioStream** streams, c_int num_streams);
 
-	[CLink] public static extern void SDL_UnbindAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_BindAudioStream(SDL_AudioDeviceID devid, SDL_AudioStream* stream);
 
-	[CLink] public static extern SDL_AudioDeviceID SDL_GetAudioStreamDevice(SDL_AudioStream* stream);
+	 [CLink] public static extern void SDL_UnbindAudioStreams(SDL_AudioStream** streams, c_int num_streams);
 
-	[CLink] public static extern SDL_AudioStream* SDL_CreateAudioStream(SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
+	 [CLink] public static extern void SDL_UnbindAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern SDL_PropertiesID SDL_GetAudioStreamProperties(SDL_AudioStream* stream);
+	 [CLink] public static extern SDL_AudioDeviceID SDL_GetAudioStreamDevice(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_GetAudioStreamFormat(SDL_AudioStream* stream, SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
+	 [CLink] public static extern SDL_AudioStream* SDL_CreateAudioStream(SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamFormat(SDL_AudioStream* stream, SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
+	 [CLink] public static extern SDL_PropertiesID SDL_GetAudioStreamProperties(SDL_AudioStream* stream);
 
-	[CLink] public static extern float SDL_GetAudioStreamFrequencyRatio(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_GetAudioStreamFormat(SDL_AudioStream* stream, SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamFrequencyRatio(SDL_AudioStream* stream, float ratio);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamFormat(SDL_AudioStream* stream, SDL_AudioSpec* src_spec, SDL_AudioSpec* dst_spec);
 
-	[CLink] public static extern float SDL_GetAudioStreamGain(SDL_AudioStream* stream);
+	 [CLink] public static extern float SDL_GetAudioStreamFrequencyRatio(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamGain(SDL_AudioStream* stream, float gain);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamFrequencyRatio(SDL_AudioStream* stream, float ratio);
 
-	[CLink] public static extern c_int*  SDL_GetAudioStreamInputChannelMap(SDL_AudioStream* stream, c_int* count);
+	 [CLink] public static extern float SDL_GetAudioStreamGain(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_int*  SDL_GetAudioStreamOutputChannelMap(SDL_AudioStream* stream, c_int* count);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamGain(SDL_AudioStream* stream, float gain);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamInputChannelMap(SDL_AudioStream* stream, c_int* chmap, c_int count);
+	 [CLink] public static extern c_int*  SDL_GetAudioStreamInputChannelMap(SDL_AudioStream* stream, c_int* count);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamOutputChannelMap(SDL_AudioStream* stream, c_int* chmap, c_int count);
+	 [CLink] public static extern c_int*  SDL_GetAudioStreamOutputChannelMap(SDL_AudioStream* stream, c_int* count);
 
-	[CLink] public static extern c_bool SDL_PutAudioStreamData(SDL_AudioStream* stream, void* buf, c_int len);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamInputChannelMap(SDL_AudioStream* stream, c_int* chmap, c_int count);
 
-	[CLink] public static extern c_int SDL_GetAudioStreamData(SDL_AudioStream* stream, void* buf, c_int len);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamOutputChannelMap(SDL_AudioStream* stream, c_int* chmap, c_int count);
 
-	[CLink] public static extern c_int SDL_GetAudioStreamAvailable(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_PutAudioStreamData(SDL_AudioStream* stream, void* buf, c_int len);
 
-	[CLink] public static extern c_int SDL_GetAudioStreamQueued(SDL_AudioStream* stream);
+	 [CLink] public static extern c_int SDL_GetAudioStreamData(SDL_AudioStream* stream, void* buf, c_int len);
 
-	[CLink] public static extern c_bool SDL_FlushAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_int SDL_GetAudioStreamAvailable(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_ClearAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_int SDL_GetAudioStreamQueued(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_PauseAudioStreamDevice(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_FlushAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_ResumeAudioStreamDevice(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_ClearAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_LockAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_PauseAudioStreamDevice(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_UnlockAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_ResumeAudioStreamDevice(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamGetCallback(SDL_AudioStream* stream, SDL_AudioStreamCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_AudioStreamDevicePaused(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_SetAudioStreamPutCallback(SDL_AudioStream* stream, SDL_AudioStreamCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_LockAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern void SDL_DestroyAudioStream(SDL_AudioStream* stream);
+	 [CLink] public static extern c_bool SDL_UnlockAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern SDL_AudioStream* SDL_OpenAudioDeviceStream(SDL_AudioDeviceID devid, SDL_AudioSpec* spec, SDL_AudioStreamCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamGetCallback(SDL_AudioStream* stream, SDL_AudioStreamCallback callback, void* userdata);
 
-	[CLink] public static extern c_bool SDL_SetAudioPostmixCallback(SDL_AudioDeviceID devid, SDL_AudioPostmixCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_SetAudioStreamPutCallback(SDL_AudioStream* stream, SDL_AudioStreamCallback callback, void* userdata);
 
-	[CLink] public static extern c_bool SDL_LoadWAV_IO(SDL_IOStream* src, bool closeio, SDL_AudioSpec* spec, uint8** audio_buf, uint32* audio_len);
+	 [CLink] public static extern void SDL_DestroyAudioStream(SDL_AudioStream* stream);
 
-	[CLink] public static extern c_bool SDL_LoadWAV(c_char* path, SDL_AudioSpec* spec, uint8** audio_buf, uint32* audio_len);
+	 [CLink] public static extern SDL_AudioStream* SDL_OpenAudioDeviceStream(SDL_AudioDeviceID devid, SDL_AudioSpec* spec, SDL_AudioStreamCallback callback, void* userdata);
 
-	[CLink] public static extern c_bool SDL_MixAudio(uint8* dst, uint8* src, SDL_AudioFormat format, uint32 len, float volume);
+	 [CLink] public static extern c_bool SDL_SetAudioPostmixCallback(SDL_AudioDeviceID devid, SDL_AudioPostmixCallback callback, void* userdata);
 
-	[CLink] public static extern c_bool SDL_ConvertAudioSamples(SDL_AudioSpec* src_spec, uint8* src_data, c_int src_len, SDL_AudioSpec* dst_spec, uint8** dst_data, c_int* dst_len);
+	 [CLink] public static extern c_bool SDL_LoadWAV_IO(SDL_IOStream* src, c_bool closeio, SDL_AudioSpec* spec, uint8** audio_buf, uint32* audio_len);
 
-	[CLink] public static extern c_char* SDL_GetAudioFormatName(SDL_AudioFormat format);
+	 [CLink] public static extern c_bool SDL_LoadWAV(c_char* path, SDL_AudioSpec* spec, uint8** audio_buf, uint32* audio_len);
 
-	[CLink] public static extern c_int SDL_GetSilenceValueForFormat(SDL_AudioFormat format);
+	 [CLink] public static extern c_bool SDL_MixAudio(uint8* dst, uint8* src, SDL_AudioFormat format, uint32 len, float volume);
+
+	 [CLink] public static extern c_bool SDL_ConvertAudioSamples(SDL_AudioSpec* src_spec, uint8* src_data, c_int src_len, SDL_AudioSpec* dst_spec, uint8** dst_data, c_int* dst_len);
+
+	 [CLink] public static extern c_char* SDL_GetAudioFormatName(SDL_AudioFormat format);
+
+	 [CLink] public static extern c_int SDL_GetSilenceValueForFormat(SDL_AudioFormat format);
 
 	//SDL_blendmode.h
 
@@ -283,7 +415,7 @@ static
 		SDL_BLENDOPERATION_MAXIMUM          = 0x5 /**< max(dst, src) : supported by D3D, OpenGL, OpenGLES, and Vulkan */
 	}
 
-	[CLink] public static extern SDL_BlendMode SDL_ComposeCustomBlendMode(SDL_BlendFactor srcColorFactor, SDL_BlendFactor dstColorFactor, SDL_BlendOperation colorOperation, SDL_BlendFactor srcAlphaFactor, SDL_BlendFactor dstAlphaFactor, SDL_BlendOperation alphaOperation);
+	 [CLink] public static extern SDL_BlendMode SDL_ComposeCustomBlendMode(SDL_BlendFactor srcColorFactor, SDL_BlendFactor dstColorFactor, SDL_BlendOperation colorOperation, SDL_BlendFactor srcAlphaFactor, SDL_BlendFactor dstAlphaFactor, SDL_BlendOperation alphaOperation);
 
 	//SDL_camera.h
 
@@ -309,35 +441,35 @@ static
 
 	public struct SDL_Camera;
 
-	[CLink] public static extern c_int SDL_GetNumCameraDrivers();
+	 [CLink] public static extern c_int SDL_GetNumCameraDrivers();
 
-	[CLink] public static extern c_char* SDL_GetCameraDriver(c_int index);
+	 [CLink] public static extern c_char* SDL_GetCameraDriver(c_int index);
 
-	[CLink] public static extern c_char* SDL_GetCurrentCameraDriver();
+	 [CLink] public static extern c_char* SDL_GetCurrentCameraDriver();
 
-	[CLink] public static extern SDL_CameraID* SDL_GetCameras(c_int* count);
+	 [CLink] public static extern SDL_CameraID* SDL_GetCameras(c_int* count);
 
-	[CLink] public static extern SDL_CameraSpec** SDL_GetCameraSupportedFormats(SDL_CameraID devid, c_int* count);
+	 [CLink] public static extern SDL_CameraSpec** SDL_GetCameraSupportedFormats(SDL_CameraID devid, c_int* count);
 
-	[CLink] public static extern c_char* SDL_GetCameraName(SDL_CameraID instance_id);
+	 [CLink] public static extern c_char* SDL_GetCameraName(SDL_CameraID instance_id);
 
-	[CLink] public static extern SDL_CameraPosition SDL_GetCameraPosition(SDL_CameraID instance_id);
+	 [CLink] public static extern SDL_CameraPosition SDL_GetCameraPosition(SDL_CameraID instance_id);
 
-	[CLink] public static extern SDL_Camera* SDL_OpenCamera(SDL_CameraID instance_id, SDL_CameraSpec* spec);
+	 [CLink] public static extern SDL_Camera* SDL_OpenCamera(SDL_CameraID instance_id, SDL_CameraSpec* spec);
 
-	[CLink] public static extern c_int SDL_GetCameraPermissionState(SDL_Camera* camera);
+	 [CLink] public static extern c_int SDL_GetCameraPermissionState(SDL_Camera* camera);
 
-	[CLink] public static extern SDL_CameraID SDL_GetCameraID(SDL_Camera* camera);
+	 [CLink] public static extern SDL_CameraID SDL_GetCameraID(SDL_Camera* camera);
 
-	[CLink] public static extern SDL_PropertiesID SDL_GetCameraProperties(SDL_Camera* camera);
+	 [CLink] public static extern SDL_PropertiesID SDL_GetCameraProperties(SDL_Camera* camera);
 
-	[CLink] public static extern c_bool SDL_GetCameraFormat(SDL_Camera* camera, SDL_CameraSpec* spec);
+	 [CLink] public static extern c_bool SDL_GetCameraFormat(SDL_Camera* camera, SDL_CameraSpec* spec);
 
-	[CLink] public static extern SDL_Surface* SDL_AcquireCameraFrame(SDL_Camera* camera, uint64* timestampNS);
+	 [CLink] public static extern SDL_Surface* SDL_AcquireCameraFrame(SDL_Camera* camera, uint64* timestampNS);
 
-	[CLink] public static extern void SDL_ReleaseCameraFrame(SDL_Camera* camera, SDL_Surface* frame);
+	 [CLink] public static extern void SDL_ReleaseCameraFrame(SDL_Camera* camera, SDL_Surface* frame);
 
-	[CLink] public static extern void SDL_CloseCamera(SDL_Camera* camera);
+	 [CLink] public static extern void SDL_CloseCamera(SDL_Camera* camera);
 
 	//SDL_clipboard.h
 
@@ -345,65 +477,67 @@ static
 
 	public typealias SDL_ClipboardCleanupCallback = function void(void* userdata);
 
-	[CLink] public static extern c_bool SDL_SetClipboardText(c_char* text);
+	 [CLink] public static extern c_bool SDL_SetClipboardText(c_char* text);
 
-	[CLink] public static extern c_char* SDL_GetClipboardText();
+	 [CLink] public static extern c_char* SDL_GetClipboardText();
 
-	[CLink] public static extern c_bool SDL_HasClipboardText();
+	 [CLink] public static extern c_bool SDL_HasClipboardText();
 
-	[CLink] public static extern c_bool SDL_SetPrimarySelectionText(c_char* text);
+	 [CLink] public static extern c_bool SDL_SetPrimarySelectionText(c_char* text);
 
-	[CLink] public static extern c_char* SDL_GetPrimarySelectionText();
+	 [CLink] public static extern c_char* SDL_GetPrimarySelectionText();
 
-	[CLink] public static extern c_bool SDL_HasPrimarySelectionText();
+	 [CLink] public static extern c_bool SDL_HasPrimarySelectionText();
 
-	[CLink] public static extern c_bool SDL_SetClipboardData(SDL_ClipboardDataCallback callback, SDL_ClipboardCleanupCallback cleanup, void* userdata, c_char** mime_types, c_size num_mime_types);
+	 [CLink] public static extern c_bool SDL_SetClipboardData(SDL_ClipboardDataCallback callback, SDL_ClipboardCleanupCallback cleanup, void* userdata, c_char** mime_types, c_size num_mime_types);
 
-	[CLink] public static extern c_bool SDL_ClearClipboardData();
+	 [CLink] public static extern c_bool SDL_ClearClipboardData();
 
-	[CLink] public static extern void*  SDL_GetClipboardData(c_char* mime_type, c_size* size);
+	 [CLink] public static extern void*  SDL_GetClipboardData(c_char* mime_type, c_size* size);
 
-	[CLink] public static extern c_bool SDL_HasClipboardData(c_char* mime_type);
+	 [CLink] public static extern c_bool SDL_HasClipboardData(c_char* mime_type);
 
-	[CLink] public static extern c_char** SDL_GetClipboardMimeTypes(c_size* num_mime_types);
+	 [CLink] public static extern c_char** SDL_GetClipboardMimeTypes(c_size* num_mime_types);
 
 	//SDL_cpuinfo.h
 
-	[CLink] public static extern c_int SDL_GetNumLogicalCPUCores();
+	public const uint32 SDL_CACHELINE_SIZE  = 128;
 
-	[CLink] public static extern c_int SDL_GetCPUCacheLineSize();
+	 [CLink] public static extern c_int SDL_GetNumLogicalCPUCores();
 
-	[CLink] public static extern c_bool SDL_HasAltiVec();
+	 [CLink] public static extern c_int SDL_GetCPUCacheLineSize();
 
-	[CLink] public static extern c_bool SDL_HasMMX();
+	 [CLink] public static extern c_bool SDL_HasAltiVec();
 
-	[CLink] public static extern c_bool SDL_HasSSE();
+	 [CLink] public static extern c_bool SDL_HasMMX();
 
-	[CLink] public static extern c_bool SDL_HasSSE2();
+	 [CLink] public static extern c_bool SDL_HasSSE();
 
-	[CLink] public static extern c_bool SDL_HasSSE3();
+	 [CLink] public static extern c_bool SDL_HasSSE2();
 
-	[CLink] public static extern c_bool SDL_HasSSE41();
+	 [CLink] public static extern c_bool SDL_HasSSE3();
 
-	[CLink] public static extern c_bool SDL_HasSSE42();
+	 [CLink] public static extern c_bool SDL_HasSSE41();
 
-	[CLink] public static extern c_bool SDL_HasAVX();
+	 [CLink] public static extern c_bool SDL_HasSSE42();
 
-	[CLink] public static extern c_bool SDL_HasAVX2();
+	 [CLink] public static extern c_bool SDL_HasAVX();
 
-	[CLink] public static extern c_bool SDL_HasAVX512F();
+	 [CLink] public static extern c_bool SDL_HasAVX2();
 
-	[CLink] public static extern c_bool SDL_HasARMSIMD();
+	 [CLink] public static extern c_bool SDL_HasAVX512F();
 
-	[CLink] public static extern c_bool SDL_HasNEON();
+	 [CLink] public static extern c_bool SDL_HasARMSIMD();
 
-	[CLink] public static extern c_bool SDL_HasLSX();
+	 [CLink] public static extern c_bool SDL_HasNEON();
 
-	[CLink] public static extern c_bool SDL_HasLASX();
+	 [CLink] public static extern c_bool SDL_HasLSX();
 
-	[CLink] public static extern c_int SDL_GetSystemRAM();
+	 [CLink] public static extern c_bool SDL_HasLASX();
 
-	[CLink] public static extern c_size SDL_GetSIMDAlignment();
+	 [CLink] public static extern c_int SDL_GetSystemRAM();
+
+	 [CLink] public static extern c_size SDL_GetSIMDAlignment();
 
 	//SDL_dialog.h
 
@@ -416,29 +550,53 @@ static
 		public c_char* pattern;
 	}
 
-	[CLink] public static extern void SDL_ShowOpenFileDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, SDL_DialogFileFilter* filters, c_int nfilters, c_char* default_location, c_bool allow_many);
+	public enum SDL_FileDialogType : c_int
+	{
+		SDL_FILEDIALOG_OPENFILE,
+		SDL_FILEDIALOG_SAVEFILE,
+		SDL_FILEDIALOG_OPENFOLDER
+	}
 
-	[CLink] public static extern void SDL_ShowSaveFileDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, SDL_DialogFileFilter* filters, c_int nfilters, c_char* default_location);
+	public const c_char* SDL_PROP_FILE_DIALOG_FILTERS_POINTER     = "SDL.filedialog.filters";
+	public const c_char* SDL_PROP_FILE_DIALOG_NFILTERS_NUMBER     = "SDL.filedialog.nfilters";
+	public const c_char* SDL_PROP_FILE_DIALOG_WINDOW_POINTER      = "SDL.filedialog.window";
+	public const c_char* SDL_PROP_FILE_DIALOG_LOCATION_STRING     = "SDL.filedialog.location";
+	public const c_char* SDL_PROP_FILE_DIALOG_MANY_BOOLEAN        = "SDL.filedialog.many";
+	public const c_char* SDL_PROP_FILE_DIALOG_TITLE_STRING        = "SDL.filedialog.title";
+	public const c_char* SDL_PROP_FILE_DIALOG_ACCEPT_STRING       = "SDL.filedialog.accept";
+	public const c_char* SDL_PROP_FILE_DIALOG_CANCEL_STRING       = "SDL.filedialog.cancel";
 
-	[CLink] public static extern void SDL_ShowOpenFolderDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, c_char* default_location, c_bool allow_many);
+	 [CLink] public static extern void SDL_ShowOpenFileDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, SDL_DialogFileFilter* filters, c_int nfilters, c_char* default_location, c_bool allow_many);
+
+	 [CLink] public static extern void SDL_ShowSaveFileDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, SDL_DialogFileFilter* filters, c_int nfilters, c_char* default_location);
+
+	 [CLink] public static extern void SDL_ShowOpenFolderDialog(SDL_DialogFileCallback callback, void* userdata, SDL_Window* window, c_char* default_location, c_bool allow_many);
+
+	 [CLink] public static extern void SDL_ShowFileDialogWithProperties(SDL_FileDialogType type, SDL_DialogFileCallback callback, void* userdata, SDL_PropertiesID props);
 
 	//SDL_error.h
 
-	[CLink] public static extern c_bool SDL_SetError(c_char* fmt, ...);
+	 [CLink] public static extern c_bool SDL_SetError(c_char* fmt, ...);
 
-	[CLink] public static extern c_bool SDL_SetErrorV(c_char* fmt, VarArgs ap);
+	 [CLink] public static extern c_bool SDL_SetErrorV(c_char* fmt, VarArgs ap);
 
-	[CLink] public static extern c_bool SDL_OutOfMemory();
+	 [CLink] public static extern c_bool SDL_OutOfMemory();
 
-	[CLink] public static extern c_char*  SDL_GetError();
+	 [CLink] public static extern c_char*  SDL_GetError();
 
-	[CLink] public static extern c_bool SDL_ClearError();
+	 [CLink] public static extern c_bool SDL_ClearError();
 
 	//SDL_events.h
+
+	private static void Assert_SDL_Event_SIZE()
+	{
+		Compiler.Assert(sizeof(SDL_Event) == sizeof(decltype(((SDL_Event*)null).padding)));
+	}
+
 	[CRepr, Union]
 	public struct SDL_Event
 	{
-		public uint32 type; /**< Event type, shared with all events, Uint32 to cover user events which are not in the SDL_EventType enumeration */
+		public uint32 type; /**< Event type, shared with all events, uint32 to cover user events which are not in the SDL_EventType enumeration */
 		public SDL_CommonEvent common; /**< Common event data */
 		public SDL_DisplayEvent display; /**< Display event data */
 		public SDL_WindowEvent window; /**< Window event data */
@@ -473,6 +631,7 @@ static
 		public SDL_PenMotionEvent pmotion; /**< Pen motion event data */
 		public SDL_PenButtonEvent pbutton; /**< Pen button event data */
 		public SDL_PenAxisEvent paxis; /**< Pen axis event data */
+		public SDL_RenderEvent render; /**< Render event data */
 		public SDL_DropEvent drop; /**< Drag and drop event data */
 		public SDL_ClipboardEvent clipboard; /**< Clipboard event data */
 
@@ -492,6 +651,14 @@ static
 		public uint8[128] padding;
 	}
 
+	[CRepr] public struct SDL_RenderEvent
+	{
+		public SDL_EventType type; /**< SDL_EVENT_RENDER_TARGETS_RESET, SDL_EVENT_RENDER_DEVICE_RESET, SDL_EVENT_RENDER_DEVICE_LOST */
+		public uint32 reserved;
+		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
+		public SDL_WindowID windowID; /**< The window containing the renderer in question. */
+	}
+
 	[CRepr]
 	public struct SDL_CommonEvent
 	{
@@ -507,8 +674,8 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_DisplayID displayID; /**< The associated display */
-		public int32 data1; /**< event dependent data */
-		public int32 data2; /**< event dependent data */
+		public c_int data1; /**< event dependent data */
+		public c_int data2; /**< event dependent data */
 	}
 
 	[CRepr]
@@ -518,8 +685,8 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_WindowID windowID; /**< The associated window */
-		public int32 data1; /**< event dependent data */
-		public int32 data2; /**< event dependent data */
+		public c_int data1; /**< event dependent data */
+		public c_int data2; /**< event dependent data */
 	}
 
 	[CRepr]
@@ -555,8 +722,8 @@ static
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_WindowID windowID; /**< The window with keyboard focus, if any */
 		public c_char* text; /**< The editing text */
-		public int32 start; /**< The start cursor of selected editing text, or -1 if not set */
-		public int32 length; /**< The length of selected editing text, or -1 if not set */
+		public c_int start; /**< The start cursor of selected editing text, or -1 if not set */
+		public c_int length; /**< The length of selected editing text, or -1 if not set */
 	}
 
 	[CRepr]
@@ -567,8 +734,8 @@ static
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_WindowID windowID; /**< The window with keyboard focus, if any */
 		public c_char** candidates; /**< The list of candidates, or NULL if there are no candidates available */
-		public int32 num_candidates; /**< The number of strings in `candidates` */
-		public int32 selected_candidate; /**< The index of the selected candidate, or -1 if no candidate is selected */
+		public c_int num_candidates; /**< The number of strings in `candidates` */
+		public c_int selected_candidate; /**< The index of the selected candidate, or -1 if no candidate is selected */
 		public c_bool horizontal; /**< true if the list is horizontal, false if it's vertical */
 		public uint8 padding1;
 		public uint8 padding2;
@@ -766,8 +933,8 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_JoystickID which; /**< The joystick instance id */
-		public int32 touchpad; /**< The index of the touchpad */
-		public int32 finger; /**< The index of the finger on the touchpad */
+		public c_int touchpad; /**< The index of the touchpad */
+		public c_int finger; /**< The index of the finger on the touchpad */
 		public float x; /**< Normalized in the range 0...1 with 0 being on the left */
 		public float y; /**< Normalized in the range 0...1 with 0 being at the top */
 		public float pressure; /**< Normalized in the range 0...1 */
@@ -780,7 +947,7 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_JoystickID which; /**< The joystick instance id */
-		public int32 sensor; /**< The type of the sensor, one of the values of SDL_SensorType */
+		public c_int sensor; /**< The type of the sensor, one of the values of SDL_SensorType */
 		public float[3] data; /**< Up to 3 values from the sensor, as defined in SDL_sensor.h */
 		public uint64 sensor_timestamp; /**< The timestamp of the sensor reading in nanoseconds, not necessarily synchronized with the system clock */
 	}
@@ -833,7 +1000,7 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public SDL_WindowID windowID; /**< The associated window if any */
-		public int32 code; /**< User defined event code */
+		public c_int code; /**< User defined event code */
 		public void* data1; /**< User defined data pointer */
 		public void* data2; /**< User defined data pointer */
 	}
@@ -942,7 +1109,7 @@ static
 		public uint32 reserved;
 		public uint64 timestamp; /**< In nanoseconds, populated using SDL_GetTicksNS() */
 		public c_bool owner; /**< are we owning the clipboard (internal update) */
-		public int32 n_mime_types; /**< number of mime types */
+		public c_int n_mime_types; /**< number of mime types */
 		public c_char** mime_types; /**< current mime types */
 	}
 
@@ -1078,6 +1245,7 @@ static
 		SDL_EVENT_FINGER_DOWN      = 0x700,
 		SDL_EVENT_FINGER_UP,
 		SDL_EVENT_FINGER_MOTION,
+		SDL_EVENT_FINGER_CANCELED,
 
 		/* 0x800, 0x801, and 0x802 were the Gesture events from SDL2. Do not reuse these values! sdl2-compat needs them! */
 
@@ -1139,8 +1307,9 @@ static
 		 */
 		SDL_EVENT_LAST    = 0xFFFF,
 
-		/* This just makes sure the enum is the size of Uint32 */
+		/* This just makes sure the enum is the size of uint32 */
 		SDL_EVENT_ENUM_PADDING = 0x7FFFFFFF
+
 	}
 
 	public enum SDL_EventAction : c_int
@@ -1152,43 +1321,43 @@ static
 
 	public typealias SDL_EventFilter = function c_bool(void* userdata, SDL_Event* event);
 
-	[CLink] public static extern void SDL_PumpEvents();
+	 [CLink] public static extern void SDL_PumpEvents();
 
-	[CLink] public static extern c_int SDL_PeepEvents(SDL_Event* events, c_int numevents, SDL_EventAction action, uint32 minType, uint32 maxType);
+	 [CLink] public static extern c_int SDL_PeepEvents(SDL_Event* events, c_int numevents, SDL_EventAction action, uint32 minType, uint32 maxType);
 
-	[CLink] public static extern c_bool SDL_HasEvent(uint32 type);
+	 [CLink] public static extern c_bool SDL_HasEvent(uint32 type);
 
-	[CLink] public static extern c_bool SDL_HasEvents(uint32 minType, uint32 maxType);
+	 [CLink] public static extern c_bool SDL_HasEvents(uint32 minType, uint32 maxType);
 
-	[CLink] public static extern void SDL_FlushEvent(uint32 type);
+	 [CLink] public static extern void SDL_FlushEvent(uint32 type);
 
-	[CLink] public static extern void SDL_FlushEvents(uint32 minType, uint32 maxType);
+	 [CLink] public static extern void SDL_FlushEvents(uint32 minType, uint32 maxType);
 
-	[CLink] public static extern c_bool SDL_PollEvent(SDL_Event* event);
+	 [CLink] public static extern c_bool SDL_PollEvent(SDL_Event* event);
 
-	[CLink] public static extern c_bool SDL_WaitEvent(SDL_Event* event);
+	 [CLink] public static extern c_bool SDL_WaitEvent(SDL_Event* event);
 
-	[CLink] public static extern c_bool SDL_WaitEventTimeout(SDL_Event* event, int32 timeoutMS);
+	 [CLink] public static extern c_bool SDL_WaitEventTimeout(SDL_Event* event, c_int timeoutMS);
 
-	[CLink] public static extern c_bool SDL_PushEvent(SDL_Event* event);
+	 [CLink] public static extern c_bool SDL_PushEvent(SDL_Event* event);
 
-	[CLink] public static extern void SDL_SetEventFilter(SDL_EventFilter filter, void* userdata);
+	 [CLink] public static extern void SDL_SetEventFilter(SDL_EventFilter filter, void* userdata);
 
-	[CLink] public static extern c_bool SDL_GetEventFilter(SDL_EventFilter* filter, void** userdata);
+	 [CLink] public static extern c_bool SDL_GetEventFilter(SDL_EventFilter* filter, void** userdata);
 
-	[CLink] public static extern c_bool SDL_AddEventWatch(SDL_EventFilter filter, void* userdata);
+	 [CLink] public static extern c_bool SDL_AddEventWatch(SDL_EventFilter filter, void* userdata);
 
-	[CLink] public static extern void SDL_RemoveEventWatch(SDL_EventFilter filter, void* userdata);
+	 [CLink] public static extern void SDL_RemoveEventWatch(SDL_EventFilter filter, void* userdata);
 
-	[CLink] public static extern void SDL_FilterEvents(SDL_EventFilter filter, void* userdata);
+	 [CLink] public static extern void SDL_FilterEvents(SDL_EventFilter filter, void* userdata);
 
-	[CLink] public static extern void SDL_SetEventEnabled(uint32 type, c_bool enabled);
+	 [CLink] public static extern void SDL_SetEventEnabled(uint32 type, c_bool enabled);
 
-	[CLink] public static extern c_bool SDL_EventEnabled(uint32 type);
+	 [CLink] public static extern c_bool SDL_EventEnabled(uint32 type);
 
-	[CLink] public static extern uint32 SDL_RegisterEvents(c_int numevents);
+	 [CLink] public static extern uint32 SDL_RegisterEvents(c_int numevents);
 
-	[CLink] public static extern SDL_Window* SDL_GetWindowFromEvent(SDL_Event* event);
+	 [CLink] public static extern SDL_Window* SDL_GetWindowFromEvent(SDL_Event* event);
 
 	//SDL_filesystem.h
 
@@ -1223,12 +1392,14 @@ static
 
 	public enum SDL_EnumerationResult : c_int
 	{
-		SDL_ENUM_CONTINUE,   /**< Value that requests that enumeration continue. */
-		SDL_ENUM_SUCCESS,    /**< Value that requests that enumeration stop, successfully. */
-		SDL_ENUM_FAILURE     /**< Value that requests that enumeration stop, as a failure. */
+		SDL_ENUM_CONTINUE, /**< Value that requests that enumeration continue. */
+		SDL_ENUM_SUCCESS, /**< Value that requests that enumeration stop, successfully. */
+		SDL_ENUM_FAILURE /**< Value that requests that enumeration stop, as a failure. */
 	}
 
 	public typealias SDL_GlobFlags = uint32;
+
+	public const uint32 SDL_GLOB_CASEINSENSITIVE  = (1 << 0);
 
 	[CRepr]
 	public struct SDL_PathInfo
@@ -1242,31 +1413,33 @@ static
 
 	public enum SDL_PathType : c_int
 	{
-		SDL_PATHTYPE_NONE,      /**< path does not exist */
-		SDL_PATHTYPE_FILE,      /**< a normal file */
+		SDL_PATHTYPE_NONE, /**< path does not exist */
+		SDL_PATHTYPE_FILE, /**< a normal file */
 		SDL_PATHTYPE_DIRECTORY, /**< a directory */
-		SDL_PATHTYPE_OTHER      /**< something completely different like a device node (not a symlink, those are always followed) */
+		SDL_PATHTYPE_OTHER /**< something completely different like a device node (not a symlink, those are always followed) */
 	}
 
-	[CLink] public static extern c_char* SDL_GetBasePath();
+	 [CLink] public static extern c_char* SDL_GetBasePath();
 
-	[CLink] public static extern c_char* SDL_GetPrefPath(c_char* org, c_char* app);
+	 [CLink] public static extern c_char* SDL_GetPrefPath(c_char* org, c_char* app);
 
-	[CLink] public static extern c_char* SDL_GetUserFolder(SDL_Folder folder);
+	 [CLink] public static extern c_char* SDL_GetUserFolder(SDL_Folder folder);
 
-	[CLink] public static extern c_bool SDL_CreateDirectory(c_char* path);
+	 [CLink] public static extern c_bool SDL_CreateDirectory(c_char* path);
 
-	[CLink] public static extern c_bool SDL_EnumerateDirectory(c_char* path, SDL_EnumerateDirectoryCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_EnumerateDirectory(c_char* path, SDL_EnumerateDirectoryCallback callback, void* userdata);
 
-	[CLink] public static extern c_bool SDL_RemovePath(c_char* path);
+	 [CLink] public static extern c_bool SDL_RemovePath(c_char* path);
 
-	[CLink] public static extern c_bool SDL_RenamePath(c_char* oldpath, c_char* newpath);
+	 [CLink] public static extern c_bool SDL_RenamePath(c_char* oldpath, c_char* newpath);
 
-	[CLink] public static extern c_bool SDL_CopyFile(c_char* oldpath, c_char* newpath);
+	 [CLink] public static extern c_bool SDL_CopyFile(c_char* oldpath, c_char* newpath);
 
-	[CLink] public static extern c_bool SDL_GetPathInfo(c_char* path, SDL_PathInfo* info);
+	 [CLink] public static extern c_bool SDL_GetPathInfo(c_char* path, SDL_PathInfo* info);
 
-	[CLink] public static extern c_char** SDL_GlobDirectory(c_char* path, c_char* pattern, SDL_GlobFlags flags, c_int* count);
+	 [CLink] public static extern c_char** SDL_GlobDirectory(c_char* path, c_char* pattern, SDL_GlobFlags flags, c_int* count);
+
+	 [CLink] public static extern c_char*  SDL_GetCurrentDirectory();
 
 	//SDL_gamepad.h
 
@@ -1400,151 +1573,157 @@ static
 		SDL_GAMEPAD_BINDTYPE_HAT
 	}
 
-	[CLink] public static extern c_int SDL_AddGamepadMapping(c_char* mapping);
+	public const c_char* SDL_PROP_GAMEPAD_CAP_MONO_LED_BOOLEAN       = SDL_PROP_JOYSTICK_CAP_MONO_LED_BOOLEAN;
+	public const c_char* SDL_PROP_GAMEPAD_CAP_RGB_LED_BOOLEAN        = SDL_PROP_JOYSTICK_CAP_RGB_LED_BOOLEAN;
+	public const c_char* SDL_PROP_GAMEPAD_CAP_PLAYER_LED_BOOLEAN     = SDL_PROP_JOYSTICK_CAP_PLAYER_LED_BOOLEAN;
+	public const c_char* SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN         = SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN;
+	public const c_char* SDL_PROP_GAMEPAD_CAP_TRIGGER_RUMBLE_BOOLEAN = SDL_PROP_JOYSTICK_CAP_TRIGGER_RUMBLE_BOOLEAN;
 
-	[CLink] public static extern c_int SDL_AddGamepadMappingsFromIO(SDL_IOStream* src, c_bool closeio);
+	 [CLink] public static extern c_int SDL_AddGamepadMapping(c_char* mapping);
 
-	[CLink] public static extern c_int SDL_AddGamepadMappingsFromFile(c_char* file);
+	 [CLink] public static extern c_int SDL_AddGamepadMappingsFromIO(SDL_IOStream* src, c_bool closeio);
 
-	[CLink] public static extern c_bool SDL_ReloadGamepadMappings();
+	 [CLink] public static extern c_int SDL_AddGamepadMappingsFromFile(c_char* file);
 
-	[CLink] public static extern c_char** SDL_GetGamepadMappings(c_int* count);
+	 [CLink] public static extern c_bool SDL_ReloadGamepadMappings();
 
-	[CLink] public static extern c_char* SDL_GetGamepadMappingForGUID(SDL_GUID guid);
+	 [CLink] public static extern c_char** SDL_GetGamepadMappings(c_int* count);
 
-	[CLink] public static extern c_char* SDL_GetGamepadMapping(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_char* SDL_GetGamepadMappingForGUID(SDL_GUID guid);
 
-	[CLink] public static extern c_bool SDL_SetGamepadMapping(SDL_JoystickID instance_id, c_char* mapping);
+	 [CLink] public static extern c_char* SDL_GetGamepadMapping(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_bool SDL_HasGamepad();
+	 [CLink] public static extern c_bool SDL_SetGamepadMapping(SDL_JoystickID instance_id, c_char* mapping);
 
-	[CLink] public static extern SDL_JoystickID* SDL_GetGamepads(c_int* count);
+	 [CLink] public static extern c_bool SDL_HasGamepad();
 
-	[CLink] public static extern c_bool SDL_IsGamepad(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_JoystickID* SDL_GetGamepads(c_int* count);
 
-	[CLink] public static extern c_char* SDL_GetGamepadNameForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_bool SDL_IsGamepad(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_char* SDL_GetGamepadPathForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_char* SDL_GetGamepadNameForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_int SDL_GetGamepadPlayerIndexForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_char* SDL_GetGamepadPathForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_GUID SDL_GetGamepadGUIDForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_int SDL_GetGamepadPlayerIndexForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern uint16 SDL_GetGamepadVendorForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_GUID SDL_GetGamepadGUIDForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern uint16 SDL_GetGamepadProductForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern uint16 SDL_GetGamepadVendorForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern uint16 SDL_GetGamepadProductVersionForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern uint16 SDL_GetGamepadProductForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_GamepadType SDL_GetGamepadTypeForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern uint16 SDL_GetGamepadProductVersionForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_GamepadType SDL_GetRealGamepadTypeForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_GamepadType SDL_GetGamepadTypeForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_char* SDL_GetGamepadMappingForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_GamepadType SDL_GetRealGamepadTypeForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Gamepad* SDL_OpenGamepad(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_char* SDL_GetGamepadMappingForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Gamepad* SDL_GetGamepadFromID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_Gamepad* SDL_OpenGamepad(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Gamepad* SDL_GetGamepadFromPlayerIndex(c_int player_index);
+	 [CLink] public static extern SDL_Gamepad* SDL_GetGamepadFromID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_PropertiesID SDL_GetGamepadProperties(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_Gamepad* SDL_GetGamepadFromPlayerIndex(c_int player_index);
 
-	[CLink] public static extern SDL_JoystickID SDL_GetGamepadID(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_PropertiesID SDL_GetGamepadProperties(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_char* SDL_GetGamepadName(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_JoystickID SDL_GetGamepadID(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_char* SDL_GetGamepadPath(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_char* SDL_GetGamepadName(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern SDL_GamepadType SDL_GetGamepadType(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_char* SDL_GetGamepadPath(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern SDL_GamepadType SDL_GetRealGamepadType(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_GamepadType SDL_GetGamepadType(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_int SDL_GetGamepadPlayerIndex(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_GamepadType SDL_GetRealGamepadType(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_bool SDL_SetGamepadPlayerIndex(SDL_Gamepad* gamepad, c_int player_index);
+	 [CLink] public static extern c_int SDL_GetGamepadPlayerIndex(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern uint16 SDL_GetGamepadVendor(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_bool SDL_SetGamepadPlayerIndex(SDL_Gamepad* gamepad, c_int player_index);
 
-	[CLink] public static extern uint16 SDL_GetGamepadProduct(SDL_Gamepad* gamepad);
+	 [CLink] public static extern uint16 SDL_GetGamepadVendor(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern uint16 SDL_GetGamepadProductVersion(SDL_Gamepad* gamepad);
+	 [CLink] public static extern uint16 SDL_GetGamepadProduct(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern uint16 SDL_GetGamepadFirmwareVersion(SDL_Gamepad* gamepad);
+	 [CLink] public static extern uint16 SDL_GetGamepadProductVersion(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_char* SDL_GetGamepadSerial(SDL_Gamepad* gamepad);
+	 [CLink] public static extern uint16 SDL_GetGamepadFirmwareVersion(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern uint64 SDL_GetGamepadSteamHandle(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_char* SDL_GetGamepadSerial(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern SDL_JoystickConnectionState SDL_GetGamepadConnectionState(SDL_Gamepad* gamepad);
+	 [CLink] public static extern uint64 SDL_GetGamepadSteamHandle(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern SDL_PowerState SDL_GetGamepadPowerInfo(SDL_Gamepad* gamepad, c_int* percent);
+	 [CLink] public static extern SDL_JoystickConnectionState SDL_GetGamepadConnectionState(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_bool SDL_GamepadConnected(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_PowerState SDL_GetGamepadPowerInfo(SDL_Gamepad* gamepad, c_int* percent);
 
-	[CLink] public static extern SDL_Joystick* SDL_GetGamepadJoystick(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_bool SDL_GamepadConnected(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern void SDL_SetGamepadEventsEnabled(c_bool enabled);
+	 [CLink] public static extern SDL_Joystick* SDL_GetGamepadJoystick(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_bool SDL_GamepadEventsEnabled();
+	 [CLink] public static extern void SDL_SetGamepadEventsEnabled(c_bool enabled);
 
-	[CLink] public static extern SDL_GamepadBinding** SDL_GetGamepadBindings(SDL_Gamepad* gamepad, c_int* count);
+	 [CLink] public static extern c_bool SDL_GamepadEventsEnabled();
 
-	[CLink] public static extern void SDL_UpdateGamepads();
+	 [CLink] public static extern SDL_GamepadBinding** SDL_GetGamepadBindings(SDL_Gamepad* gamepad, c_int* count);
 
-	[CLink] public static extern SDL_GamepadType SDL_GetGamepadTypeFromString(c_char* str);
+	 [CLink] public static extern void SDL_UpdateGamepads();
 
-	[CLink] public static extern c_char* SDL_GetGamepadStringForType(SDL_GamepadType type);
+	 [CLink] public static extern SDL_GamepadType SDL_GetGamepadTypeFromString(c_char* str);
 
-	[CLink] public static extern SDL_GamepadAxis SDL_GetGamepadAxisFromString(c_char* str);
+	 [CLink] public static extern c_char* SDL_GetGamepadStringForType(SDL_GamepadType type);
 
-	[CLink] public static extern c_char* SDL_GetGamepadStringForAxis(SDL_GamepadAxis axis);
+	 [CLink] public static extern SDL_GamepadAxis SDL_GetGamepadAxisFromString(c_char* str);
 
-	[CLink] public static extern c_bool SDL_GamepadHasAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
+	 [CLink] public static extern c_char* SDL_GetGamepadStringForAxis(SDL_GamepadAxis axis);
 
-	[CLink] public static extern int16 SDL_GetGamepadAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
+	 [CLink] public static extern c_bool SDL_GamepadHasAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
 
-	[CLink] public static extern SDL_GamepadButton SDL_GetGamepadButtonFromString(c_char* str);
+	 [CLink] public static extern int16 SDL_GetGamepadAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
 
-	[CLink] public static extern c_char* SDL_GetGamepadStringForButton(SDL_GamepadButton button);
+	 [CLink] public static extern SDL_GamepadButton SDL_GetGamepadButtonFromString(c_char* str);
 
-	[CLink] public static extern c_bool SDL_GamepadHasButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
+	 [CLink] public static extern c_char* SDL_GetGamepadStringForButton(SDL_GamepadButton button);
 
-	[CLink] public static extern c_bool SDL_GetGamepadButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
+	 [CLink] public static extern c_bool SDL_GamepadHasButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
 
-	[CLink] public static extern SDL_GamepadButtonLabel SDL_GetGamepadButtonLabelForType(SDL_GamepadType type, SDL_GamepadButton button);
+	 [CLink] public static extern c_bool SDL_GetGamepadButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
 
-	[CLink] public static extern SDL_GamepadButtonLabel SDL_GetGamepadButtonLabel(SDL_Gamepad* gamepad, SDL_GamepadButton button);
+	 [CLink] public static extern SDL_GamepadButtonLabel SDL_GetGamepadButtonLabelForType(SDL_GamepadType type, SDL_GamepadButton button);
 
-	[CLink] public static extern c_int SDL_GetNumGamepadTouchpads(SDL_Gamepad* gamepad);
+	 [CLink] public static extern SDL_GamepadButtonLabel SDL_GetGamepadButtonLabel(SDL_Gamepad* gamepad, SDL_GamepadButton button);
 
-	[CLink] public static extern c_int SDL_GetNumGamepadTouchpadFingers(SDL_Gamepad* gamepad, c_int touchpad);
+	 [CLink] public static extern c_int SDL_GetNumGamepadTouchpads(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_bool SDL_GetGamepadTouchpadFinger(SDL_Gamepad* gamepad, c_int touchpad, c_int finger, c_bool* down, float* x, float* y, float* pressure);
+	 [CLink] public static extern c_int SDL_GetNumGamepadTouchpadFingers(SDL_Gamepad* gamepad, c_int touchpad);
 
-	[CLink] public static extern c_bool SDL_GamepadHasSensor(SDL_Gamepad* gamepad, SDL_SensorType type);
+	 [CLink] public static extern c_bool SDL_GetGamepadTouchpadFinger(SDL_Gamepad* gamepad, c_int touchpad, c_int finger, c_bool* down, float* x, float* y, float* pressure);
 
-	[CLink] public static extern c_bool SDL_SetGamepadSensorEnabled(SDL_Gamepad* gamepad, SDL_SensorType type, c_bool enabled);
+	 [CLink] public static extern c_bool SDL_GamepadHasSensor(SDL_Gamepad* gamepad, SDL_SensorType type);
 
-	[CLink] public static extern c_bool SDL_GamepadSensorEnabled(SDL_Gamepad* gamepad, SDL_SensorType type);
+	 [CLink] public static extern c_bool SDL_SetGamepadSensorEnabled(SDL_Gamepad* gamepad, SDL_SensorType type, c_bool enabled);
 
-	[CLink] public static extern float SDL_GetGamepadSensorDataRate(SDL_Gamepad* gamepad, SDL_SensorType type);
+	 [CLink] public static extern c_bool SDL_GamepadSensorEnabled(SDL_Gamepad* gamepad, SDL_SensorType type);
 
-	[CLink] public static extern c_bool SDL_GetGamepadSensorData(SDL_Gamepad* gamepad, SDL_SensorType type, float* data, c_int num_values);
+	 [CLink] public static extern float SDL_GetGamepadSensorDataRate(SDL_Gamepad* gamepad, SDL_SensorType type);
 
-	[CLink] public static extern c_bool SDL_RumbleGamepad(SDL_Gamepad* gamepad, uint16 low_frequency_rumble, uint16 high_frequency_rumble, uint32 duration_ms);
+	 [CLink] public static extern c_bool SDL_GetGamepadSensorData(SDL_Gamepad* gamepad, SDL_SensorType type, float* data, c_int num_values);
 
-	[CLink] public static extern c_bool SDL_RumbleGamepadTriggers(SDL_Gamepad* gamepad, uint16 left_rumble, uint16 right_rumble, uint32 duration_ms);
+	 [CLink] public static extern c_bool SDL_RumbleGamepad(SDL_Gamepad* gamepad, uint16 low_frequency_rumble, uint16 high_frequency_rumble, uint32 duration_ms);
 
-	[CLink] public static extern c_bool SDL_SetGamepadLED(SDL_Gamepad* gamepad, uint8 red, uint8 green, uint8 blue);
+	 [CLink] public static extern c_bool SDL_RumbleGamepadTriggers(SDL_Gamepad* gamepad, uint16 left_rumble, uint16 right_rumble, uint32 duration_ms);
 
-	[CLink] public static extern c_bool SDL_SendGamepadEffect(SDL_Gamepad* gamepad, void* data, c_int size);
+	 [CLink] public static extern c_bool SDL_SetGamepadLED(SDL_Gamepad* gamepad, uint8 red, uint8 green, uint8 blue);
 
-	[CLink] public static extern void SDL_CloseGamepad(SDL_Gamepad* gamepad);
+	 [CLink] public static extern c_bool SDL_SendGamepadEffect(SDL_Gamepad* gamepad, void* data, c_int size);
 
-	[CLink] public static extern c_char* SDL_GetGamepadAppleSFSymbolsNameForButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
+	 [CLink] public static extern void SDL_CloseGamepad(SDL_Gamepad* gamepad);
 
-	[CLink] public static extern c_char* SDL_GetGamepadAppleSFSymbolsNameForAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
+	 [CLink] public static extern c_char* SDL_GetGamepadAppleSFSymbolsNameForButton(SDL_Gamepad* gamepad, SDL_GamepadButton button);
+
+	 [CLink] public static extern c_char* SDL_GetGamepadAppleSFSymbolsNameForAxis(SDL_Gamepad* gamepad, SDL_GamepadAxis axis);
 
 	//SDL_gpu.h
 
@@ -1738,6 +1917,16 @@ static
 		SDL_GPU_FRONTFACE_CLOCKWISE /**< A triangle with clockwise vertex winding will be considered front-facing. */
 	}
 
+	public enum SDL_GPUCubeMapFace : c_int
+	{
+		SDL_GPU_CUBEMAPFACE_POSITIVEX,
+		SDL_GPU_CUBEMAPFACE_NEGATIVEX,
+		SDL_GPU_CUBEMAPFACE_POSITIVEY,
+		SDL_GPU_CUBEMAPFACE_NEGATIVEY,
+		SDL_GPU_CUBEMAPFACE_POSITIVEZ,
+		SDL_GPU_CUBEMAPFACE_NEGATIVEZ
+	}
+
 	[CRepr]
 	public struct SDL_GPUMultisampleState
 	{
@@ -1814,7 +2003,7 @@ static
 		public SDL_GPUColorTargetDescription* color_target_descriptions; /**< A pointer to an array of color target descriptions. */
 		public uint32 num_color_targets; /**< The number of color target descriptions in the above array. */
 		public SDL_GPUTextureFormat depth_stencil_format; /**< The pixel format of the depth-stencil target. Ignored if has_depth_stencil_target is false. */
-		public bool has_depth_stencil_target; /**< true specifies that the pipeline uses a depth-stencil target. */
+		public c_bool has_depth_stencil_target; /**< true specifies that the pipeline uses a depth-stencil target. */
 		public uint8 padding1;
 		public uint8 padding2;
 		public uint8 padding3;
@@ -2343,14 +2532,14 @@ static
 	[CRepr]
 	public struct SDL_GPUDepthStencilTargetInfo
 	{
-		public SDL_GPUTexture *texture;               /**< The texture that will be used as the depth stencil target by the render pass. */
-		public float clear_depth;                     /**< The value to clear the depth component to at the beginning of the render pass. Ignored if SDL_GPU_LOADOP_CLEAR is not used. */
-		public SDL_GPULoadOp load_op;                 /**< What is done with the depth contents at the beginning of the render pass. */
-		public SDL_GPUStoreOp store_op;               /**< What is done with the depth results of the render pass. */
-		public SDL_GPULoadOp stencil_load_op;         /**< What is done with the stencil contents at the beginning of the render pass. */
-		public SDL_GPUStoreOp stencil_store_op;       /**< What is done with the stencil results of the render pass. */
-		public c_bool cycle;                        /**< true cycles the texture if the texture is bound and any load ops are not LOAD */
-		public uint8 clear_stencil;                   /**< The value to clear the stencil component to at the beginning of the render pass. Ignored if SDL_GPU_LOADOP_CLEAR is not used. */
+		public SDL_GPUTexture* texture; /**< The texture that will be used as the depth stencil target by the render pass. */
+		public float clear_depth; /**< The value to clear the depth component to at the beginning of the render pass. Ignored if SDL_GPU_LOADOP_CLEAR is not used. */
+		public SDL_GPULoadOp load_op; /**< What is done with the depth contents at the beginning of the render pass. */
+		public SDL_GPUStoreOp store_op; /**< What is done with the depth results of the render pass. */
+		public SDL_GPULoadOp stencil_load_op; /**< What is done with the stencil contents at the beginning of the render pass. */
+		public SDL_GPUStoreOp stencil_store_op; /**< What is done with the stencil results of the render pass. */
+		public c_bool cycle; /**< true cycles the texture if the texture is bound and any load ops are not LOAD */
+		public uint8 clear_stencil; /**< The value to clear the stencil component to at the beginning of the render pass. Ignored if SDL_GPU_LOADOP_CLEAR is not used. */
 		public int8 padding1;
 		public uint8 padding2;
 	}
@@ -2358,194 +2547,266 @@ static
 	[CRepr]
 	public struct SDL_GPUStorageBufferReadWriteBinding
 	{
-		public SDL_GPUBuffer *buffer;  /**< The buffer to bind. Must have been created with SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE. */
-		public c_bool cycle;             /**< true cycles the buffer if it is already bound. */
+		public SDL_GPUBuffer* buffer; /**< The buffer to bind. Must have been created with SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE. */
+		public c_bool cycle; /**< true cycles the buffer if it is already bound. */
 		public uint8 padding1;
 		public uint8 padding2;
 		public uint8 padding3;
 	}
 
-	[CLink] public static extern c_bool SDL_CancelGPUCommandBuffer(SDL_GPUCommandBuffer* command_buffer);
+	[CRepr]
+	public struct SDL_GPUIndirectDrawCommand
+	{
+		public uint32 num_vertices; /**< The number of vertices to draw. */
+		public uint32 num_instances; /**< The number of instances to draw. */
+		public uint32 first_vertex; /**< The index of the first vertex to draw. */
+		public uint32 first_instance; /**< The ID of the first instance to draw. */
+	}
 
-	[CLink] public static extern c_bool SDL_GPUSupportsShaderFormats(SDL_GPUShaderFormat format_flags, c_char* name);
+	[CRepr]
+	public struct SDL_GPUIndexedIndirectDrawCommand
+	{
+		public uint32 num_indices; /**< The number of indices to draw per instance. */
+		public uint32 num_instances; /**< The number of instances to draw. */
+		public uint32 first_index; /**< The base index within the index buffer. */
+		public c_int vertex_offset; /**< The value added to the vertex index before indexing into the vertex buffer. */
+		public uint32 first_instance; /**< The ID of the first instance to draw. */
+	}
 
-	[CLink] public static extern c_bool SDL_GPUSupportsProperties(SDL_PropertiesID props);
+	[CRepr]
+	public struct SDL_GPUIndirectDispatchCommand
+	{
+		public uint32 groupcount_x; /**< The number of local workgroups to dispatch in the X dimension. */
+		public uint32 groupcount_y; /**< The number of local workgroups to dispatch in the Y dimension. */
+		public uint32 groupcount_z; /**< The number of local workgroups to dispatch in the Z dimension. */
+	}
 
-	[CLink] public static extern SDL_GPUDevice* SDL_CreateGPUDevice(SDL_GPUShaderFormat format_flags, c_bool debug_mode, c_char* name);
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN          = "SDL.gpu.device.create.debugmode";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN     = "SDL.gpu.device.create.preferlowpower";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING                = "SDL.gpu.device.create.name";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_PRIVATE_BOOLEAN    = "SDL.gpu.device.create.shaders.private";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN      = "SDL.gpu.device.create.shaders.spirv";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXBC_BOOLEAN       = "SDL.gpu.device.create.shaders.dxbc";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN       = "SDL.gpu.device.create.shaders.dxil";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN        = "SDL.gpu.device.create.shaders.msl";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN   = "SDL.gpu.device.create.shaders.metallib";
+	public const c_char* SDL_PROP_GPU_DEVICE_CREATE_D3D12_SEMANTIC_NAME_STRING = "SDL.gpu.device.create.d3d12.semantic";
 
-	[CLink] public static extern SDL_GPUDevice* SDL_CreateGPUDeviceWithProperties(SDL_PropertiesID props);
+	public const c_char* SDL_PROP_GPU_COMPUTEPIPELINE_CREATE_NAME_STRING = "SDL.gpu.computepipeline.create.name";
 
-	[CLink] public static extern void SDL_DestroyGPUDevice(SDL_GPUDevice* device);
+	public const c_char* SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING = "SDL.gpu.graphicspipeline.create.name";
 
-	[CLink] public static extern c_int SDL_GetNumGPUDrivers();
+	public const c_char* SDL_PROP_GPU_SAMPLER_CREATE_NAME_STRING = "SDL.gpu.sampler.create.name";
 
-	[CLink] public static extern c_char* SDL_GetGPUDriver(c_int index);
+	public const c_char* SDL_PROP_GPU_SHADER_CREATE_NAME_STRING = "SDL.gpu.shader.create.name";
 
-	[CLink] public static extern c_char* SDL_GetGPUDeviceDriver(SDL_GPUDevice* device);
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT       = "SDL.gpu.texture.create.d3d12.clear.r";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT       = "SDL.gpu.texture.create.d3d12.clear.g";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT       = "SDL.gpu.texture.create.d3d12.clear.b";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT       = "SDL.gpu.texture.create.d3d12.clear.a";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_DEPTH_FLOAT   = "SDL.gpu.texture.create.d3d12.clear.depth";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_STENCIL_UINT8 = "SDL.gpu.texture.create.d3d12.clear.stencil";
+	public const c_char* SDL_PROP_GPU_TEXTURE_CREATE_NAME_STRING               = "SDL.gpu.texture.create.name";
 
-	[CLink] public static extern SDL_GPUShaderFormat SDL_GetGPUShaderFormats(SDL_GPUDevice* device);
+	public const c_char* SDL_PROP_GPU_BUFFER_CREATE_NAME_STRING = "SDL.gpu.buffer.create.name";
 
-	[CLink] public static extern SDL_GPUComputePipeline* SDL_CreateGPUComputePipeline(SDL_GPUDevice* device, SDL_GPUComputePipelineCreateInfo* createinfo);
+	public const c_char* SDL_PROP_GPU_TRANSFERBUFFER_CREATE_NAME_STRING = "SDL.gpu.transferbuffer.create.name";
 
-	[CLink] public static extern SDL_GPUGraphicsPipeline* SDL_CreateGPUGraphicsPipeline(SDL_GPUDevice* device, SDL_GPUGraphicsPipelineCreateInfo* createinfo);
+	 [CLink] public static extern c_bool SDL_CancelGPUCommandBuffer(SDL_GPUCommandBuffer* command_buffer);
 
-	[CLink] public static extern SDL_GPUSampler* SDL_CreateGPUSampler(SDL_GPUDevice* device, SDL_GPUSamplerCreateInfo* createinfo);
+	 [CLink] public static extern c_bool SDL_GPUSupportsShaderFormats(SDL_GPUShaderFormat format_flags, c_char* name);
 
-	[CLink] public static extern SDL_GPUShader* SDL_CreateGPUShader(SDL_GPUDevice* device, SDL_GPUShaderCreateInfo* createinfo);
+	 [CLink] public static extern c_bool SDL_GPUSupportsProperties(SDL_PropertiesID props);
 
-	[CLink] public static extern SDL_GPUTexture* SDL_CreateGPUTexture(SDL_GPUDevice* device, SDL_GPUTextureCreateInfo* createinfo);
+	 [CLink] public static extern SDL_GPUDevice* SDL_CreateGPUDevice(SDL_GPUShaderFormat format_flags, c_bool debug_mode, c_char* name);
 
-	[CLink] public static extern SDL_GPUBuffer* SDL_CreateGPUBuffer(SDL_GPUDevice* device, SDL_GPUBufferCreateInfo* createinfo);
+	 [CLink] public static extern SDL_GPUDevice* SDL_CreateGPUDeviceWithProperties(SDL_PropertiesID props);
 
-	[CLink] public static extern SDL_GPUTransferBuffer* SDL_CreateGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBufferCreateInfo* createinfo);
+	 [CLink] public static extern void SDL_DestroyGPUDevice(SDL_GPUDevice* device);
 
-	[CLink] public static extern void SDL_SetGPUBufferName(SDL_GPUDevice* device, SDL_GPUBuffer* buffer, c_char* text);
+	 [CLink] public static extern c_int SDL_GetNumGPUDrivers();
 
-	[CLink] public static extern void SDL_SetGPUTextureName(SDL_GPUDevice* device, SDL_GPUTexture* texture, c_char* text);
+	 [CLink] public static extern c_char* SDL_GetGPUDriver(c_int index);
 
-	[CLink] public static extern void SDL_InsertGPUDebugLabel(SDL_GPUCommandBuffer* command_buffer, c_char* text);
+	 [CLink] public static extern c_char* SDL_GetGPUDeviceDriver(SDL_GPUDevice* device);
 
-	[CLink] public static extern void SDL_PushGPUDebugGroup(SDL_GPUCommandBuffer* command_buffer, c_char* name);
+	 [CLink] public static extern SDL_GPUShaderFormat SDL_GetGPUShaderFormats(SDL_GPUDevice* device);
 
-	[CLink] public static extern void SDL_PopGPUDebugGroup(SDL_GPUCommandBuffer* command_buffer);
+	 [CLink] public static extern SDL_GPUComputePipeline* SDL_CreateGPUComputePipeline(SDL_GPUDevice* device, SDL_GPUComputePipelineCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture);
+	 [CLink] public static extern SDL_GPUGraphicsPipeline* SDL_CreateGPUGraphicsPipeline(SDL_GPUDevice* device, SDL_GPUGraphicsPipelineCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUSampler(SDL_GPUDevice* device, SDL_GPUSampler* sampler);
+	 [CLink] public static extern SDL_GPUSampler* SDL_CreateGPUSampler(SDL_GPUDevice* device, SDL_GPUSamplerCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUBuffer(SDL_GPUDevice* device, SDL_GPUBuffer* buffer);
+	 [CLink] public static extern SDL_GPUShader* SDL_CreateGPUShader(SDL_GPUDevice* device, SDL_GPUShaderCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer);
+	 [CLink] public static extern SDL_GPUTexture* SDL_CreateGPUTexture(SDL_GPUDevice* device, SDL_GPUTextureCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUComputePipeline(SDL_GPUDevice* device, SDL_GPUComputePipeline* compute_pipeline);
+	 [CLink] public static extern SDL_GPUBuffer* SDL_CreateGPUBuffer(SDL_GPUDevice* device, SDL_GPUBufferCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUShader(SDL_GPUDevice* device, SDL_GPUShader* shader);
+	 [CLink] public static extern SDL_GPUTransferBuffer* SDL_CreateGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBufferCreateInfo* createinfo);
 
-	[CLink] public static extern void SDL_ReleaseGPUGraphicsPipeline(SDL_GPUDevice* device, SDL_GPUGraphicsPipeline* graphics_pipeline);
+	 [CLink] public static extern void SDL_SetGPUBufferName(SDL_GPUDevice* device, SDL_GPUBuffer* buffer, c_char* text);
 
-	[CLink] public static extern SDL_GPUCommandBuffer* SDL_AcquireGPUCommandBuffer(SDL_GPUDevice* device);
+	 [CLink] public static extern void SDL_SetGPUTextureName(SDL_GPUDevice* device, SDL_GPUTexture* texture, c_char* text);
 
-	[CLink] public static extern void SDL_PushGPUVertexUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
+	 [CLink] public static extern void SDL_InsertGPUDebugLabel(SDL_GPUCommandBuffer* command_buffer, c_char* text);
 
-	[CLink] public static extern void SDL_PushGPUFragmentUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
+	 [CLink] public static extern void SDL_PushGPUDebugGroup(SDL_GPUCommandBuffer* command_buffer, c_char* name);
 
-	[CLink] public static extern void SDL_PushGPUComputeUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
+	 [CLink] public static extern void SDL_PopGPUDebugGroup(SDL_GPUCommandBuffer* command_buffer);
 
-	[CLink] public static extern SDL_GPURenderPass* SDL_BeginGPURenderPass(SDL_GPUCommandBuffer* command_buffer, SDL_GPUColorTargetInfo* color_target_infos, uint32 num_color_targets, SDL_GPUDepthStencilTargetInfo* depth_stencil_target_info);
+	 [CLink] public static extern void SDL_ReleaseGPUTexture(SDL_GPUDevice* device, SDL_GPUTexture* texture);
 
-	[CLink] public static extern void SDL_BindGPUGraphicsPipeline(SDL_GPURenderPass* render_pass, SDL_GPUGraphicsPipeline* graphics_pipeline);
+	 [CLink] public static extern void SDL_ReleaseGPUSampler(SDL_GPUDevice* device, SDL_GPUSampler* sampler);
 
-	[CLink] public static extern void SDL_SetGPUViewport(SDL_GPURenderPass* render_pass, SDL_GPUViewport* viewport);
+	 [CLink] public static extern void SDL_ReleaseGPUBuffer(SDL_GPUDevice* device, SDL_GPUBuffer* buffer);
 
-	[CLink] public static extern void SDL_SetGPUScissor(SDL_GPURenderPass* render_pass, SDL_Rect* scissor);
+	 [CLink] public static extern void SDL_ReleaseGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer);
 
-	[CLink] public static extern void SDL_SetGPUBlendConstants(SDL_GPURenderPass* render_pass, SDL_FColor blend_constants);
+	 [CLink] public static extern void SDL_ReleaseGPUComputePipeline(SDL_GPUDevice* device, SDL_GPUComputePipeline* compute_pipeline);
 
-	[CLink] public static extern void SDL_SetGPUStencilReference(SDL_GPURenderPass* render_pass, uint8 reference);
+	 [CLink] public static extern void SDL_ReleaseGPUShader(SDL_GPUDevice* device, SDL_GPUShader* shader);
 
-	[CLink] public static extern void SDL_BindGPUVertexBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBufferBinding* bindings, uint32 num_bindings);
+	 [CLink] public static extern void SDL_ReleaseGPUGraphicsPipeline(SDL_GPUDevice* device, SDL_GPUGraphicsPipeline* graphics_pipeline);
 
-	[CLink] public static extern void SDL_BindGPUIndexBuffer(SDL_GPURenderPass* render_pass, SDL_GPUBufferBinding* binding, SDL_GPUIndexElementSize index_element_size);
+	 [CLink] public static extern SDL_GPUCommandBuffer* SDL_AcquireGPUCommandBuffer(SDL_GPUDevice* device);
 
-	[CLink] public static extern void SDL_BindGPUVertexSamplers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
+	 [CLink] public static extern void SDL_PushGPUVertexUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
 
-	[CLink] public static extern void SDL_BindGPUVertexStorageTextures(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
+	 [CLink] public static extern void SDL_PushGPUFragmentUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
 
-	[CLink] public static extern void SDL_BindGPUVertexStorageBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
+	 [CLink] public static extern void SDL_PushGPUComputeUniformData(SDL_GPUCommandBuffer* command_buffer, uint32 slot_index, void* data, uint32 length);
 
-	[CLink] public static extern void SDL_BindGPUFragmentSamplers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
+	 [CLink] public static extern SDL_GPURenderPass* SDL_BeginGPURenderPass(SDL_GPUCommandBuffer* command_buffer, SDL_GPUColorTargetInfo* color_target_infos, uint32 num_color_targets, SDL_GPUDepthStencilTargetInfo* depth_stencil_target_info);
 
-	[CLink] public static extern void SDL_BindGPUFragmentStorageTextures(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
+	 [CLink] public static extern void SDL_BindGPUGraphicsPipeline(SDL_GPURenderPass* render_pass, SDL_GPUGraphicsPipeline* graphics_pipeline);
 
-	[CLink] public static extern void SDL_BindGPUFragmentStorageBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
+	 [CLink] public static extern void SDL_SetGPUViewport(SDL_GPURenderPass* render_pass, SDL_GPUViewport* viewport);
 
-	[CLink] public static extern void SDL_DrawGPUIndexedPrimitives(SDL_GPURenderPass* render_pass, uint32 num_indices, uint32 num_instances, uint32 first_index, int32 vertex_offset, uint32 first_instance);
+	 [CLink] public static extern void SDL_SetGPUScissor(SDL_GPURenderPass* render_pass, SDL_Rect* scissor);
 
-	[CLink] public static extern void SDL_DrawGPUPrimitives(SDL_GPURenderPass* render_pass, uint32 num_vertices, uint32 num_instances, uint32 first_vertex, uint32 first_instance);
+	 [CLink] public static extern void SDL_SetGPUBlendConstants(SDL_GPURenderPass* render_pass, SDL_FColor blend_constants);
 
-	[CLink] public static extern void SDL_DrawGPUPrimitivesIndirect(SDL_GPURenderPass* render_pass, SDL_GPUBuffer* buffer, uint32 offset, uint32 draw_count);
+	 [CLink] public static extern void SDL_SetGPUStencilReference(SDL_GPURenderPass* render_pass, uint8 reference);
 
-	[CLink] public static extern void SDL_DrawGPUIndexedPrimitivesIndirect(SDL_GPURenderPass* render_pass, SDL_GPUBuffer* buffer, uint32 offset, uint32 draw_count);
+	 [CLink] public static extern void SDL_BindGPUVertexBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBufferBinding* bindings, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_EndGPURenderPass(SDL_GPURenderPass* render_pass);
+	 [CLink] public static extern void SDL_BindGPUIndexBuffer(SDL_GPURenderPass* render_pass, SDL_GPUBufferBinding* binding, SDL_GPUIndexElementSize index_element_size);
 
-	[CLink] public static extern SDL_GPUComputePass* SDL_BeginGPUComputePass(SDL_GPUCommandBuffer* command_buffer, SDL_GPUStorageTextureReadWriteBinding* storage_texture_bindings, uint32 num_storage_texture_bindings, SDL_GPUStorageBufferReadWriteBinding* storage_buffer_bindings, uint32 num_storage_buffer_bindings);
+	 [CLink] public static extern void SDL_BindGPUVertexSamplers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_BindGPUComputePipeline(SDL_GPUComputePass* compute_pass, SDL_GPUComputePipeline* compute_pipeline);
+	 [CLink] public static extern void SDL_BindGPUVertexStorageTextures(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_BindGPUComputeSamplers(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
+	 [CLink] public static extern void SDL_BindGPUVertexStorageBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_BindGPUComputeStorageTextures(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
+	 [CLink] public static extern void SDL_BindGPUFragmentSamplers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_BindGPUComputeStorageBuffers(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
+	 [CLink] public static extern void SDL_BindGPUFragmentStorageTextures(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_DispatchGPUCompute(SDL_GPUComputePass* compute_pass, uint32 groupcount_x, uint32 groupcount_y, uint32 groupcount_z);
+	 [CLink] public static extern void SDL_BindGPUFragmentStorageBuffers(SDL_GPURenderPass* render_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_DispatchGPUComputeIndirect(SDL_GPUComputePass* compute_pass, SDL_GPUBuffer* buffer, uint32 offset);
+	 [CLink] public static extern void SDL_DrawGPUIndexedPrimitives(SDL_GPURenderPass* render_pass, uint32 num_indices, uint32 num_instances, uint32 first_index, c_int vertex_offset, uint32 first_instance);
 
-	[CLink] public static extern void SDL_EndGPUComputePass(SDL_GPUComputePass* compute_pass);
+	 [CLink] public static extern void SDL_DrawGPUPrimitives(SDL_GPURenderPass* render_pass, uint32 num_vertices, uint32 num_instances, uint32 first_vertex, uint32 first_instance);
 
-	[CLink] public static extern void* SDL_MapGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer, c_bool cycle);
+	 [CLink] public static extern void SDL_DrawGPUPrimitivesIndirect(SDL_GPURenderPass* render_pass, SDL_GPUBuffer* buffer, uint32 offset, uint32 draw_count);
 
-	[CLink] public static extern void SDL_UnmapGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer);
+	 [CLink] public static extern void SDL_DrawGPUIndexedPrimitivesIndirect(SDL_GPURenderPass* render_pass, SDL_GPUBuffer* buffer, uint32 offset, uint32 draw_count);
 
-	[CLink] public static extern SDL_GPUCopyPass* SDL_BeginGPUCopyPass(SDL_GPUCommandBuffer* command_buffer);
+	 [CLink] public static extern void SDL_EndGPURenderPass(SDL_GPURenderPass* render_pass);
 
-	[CLink] public static extern void SDL_UploadToGPUTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureTransferInfo* source, SDL_GPUTextureRegion* destination, c_bool cycle);
+	 [CLink] public static extern SDL_GPUComputePass* SDL_BeginGPUComputePass(SDL_GPUCommandBuffer* command_buffer, SDL_GPUStorageTextureReadWriteBinding* storage_texture_bindings, uint32 num_storage_texture_bindings, SDL_GPUStorageBufferReadWriteBinding* storage_buffer_bindings, uint32 num_storage_buffer_bindings);
 
-	[CLink] public static extern void SDL_UploadToGPUBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUTransferBufferLocation* source, SDL_GPUBufferRegion* destination, c_bool cycle);
+	 [CLink] public static extern void SDL_BindGPUComputePipeline(SDL_GPUComputePass* compute_pass, SDL_GPUComputePipeline* compute_pipeline);
 
-	[CLink] public static extern void SDL_CopyGPUTextureToTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureLocation* source, SDL_GPUTextureLocation* destination, uint32 w, uint32 h, uint32 d, c_bool cycle);
+	 [CLink] public static extern void SDL_BindGPUComputeSamplers(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUTextureSamplerBinding* texture_sampler_bindings, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_CopyGPUBufferToBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUBufferLocation* source, SDL_GPUBufferLocation* destination, uint32 size, c_bool cycle);
+	 [CLink] public static extern void SDL_BindGPUComputeStorageTextures(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUTexture** storage_textures, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_DownloadFromGPUTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureRegion* source, SDL_GPUTextureTransferInfo* destination);
+	 [CLink] public static extern void SDL_BindGPUComputeStorageBuffers(SDL_GPUComputePass* compute_pass, uint32 first_slot, SDL_GPUBuffer** storage_buffers, uint32 num_bindings);
 
-	[CLink] public static extern void SDL_DownloadFromGPUBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUBufferRegion* source, SDL_GPUTransferBufferLocation* destination);
+	 [CLink] public static extern void SDL_DispatchGPUCompute(SDL_GPUComputePass* compute_pass, uint32 groupcount_x, uint32 groupcount_y, uint32 groupcount_z);
 
-	[CLink] public static extern void SDL_EndGPUCopyPass(SDL_GPUCopyPass* copy_pass);
+	 [CLink] public static extern void SDL_DispatchGPUComputeIndirect(SDL_GPUComputePass* compute_pass, SDL_GPUBuffer* buffer, uint32 offset);
 
-	[CLink] public static extern void SDL_GenerateMipmapsForGPUTexture(SDL_GPUCommandBuffer* command_buffer, SDL_GPUTexture* texture);
+	 [CLink] public static extern void SDL_EndGPUComputePass(SDL_GPUComputePass* compute_pass);
 
-	[CLink] public static extern void SDL_BlitGPUTexture(SDL_GPUCommandBuffer* command_buffer, SDL_GPUBlitInfo* info);
+	 [CLink] public static extern void* SDL_MapGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer, c_bool cycle);
 
-	[CLink] public static extern c_bool SDL_WindowSupportsGPUSwapchainComposition(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUSwapchainComposition swapchain_composition);
+	 [CLink] public static extern void SDL_UnmapGPUTransferBuffer(SDL_GPUDevice* device, SDL_GPUTransferBuffer* transfer_buffer);
 
-	[CLink] public static extern c_bool SDL_WindowSupportsGPUPresentMode(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUPresentMode present_mode);
+	 [CLink] public static extern SDL_GPUCopyPass* SDL_BeginGPUCopyPass(SDL_GPUCommandBuffer* command_buffer);
 
-	[CLink] public static extern c_bool SDL_ClaimWindowForGPUDevice(SDL_GPUDevice* device, SDL_Window* window);
+	 [CLink] public static extern void SDL_UploadToGPUTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureTransferInfo* source, SDL_GPUTextureRegion* destination, c_bool cycle);
 
-	[CLink] public static extern void SDL_ReleaseWindowFromGPUDevice(SDL_GPUDevice* device, SDL_Window* window);
+	 [CLink] public static extern void SDL_UploadToGPUBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUTransferBufferLocation* source, SDL_GPUBufferRegion* destination, c_bool cycle);
 
-	[CLink] public static extern c_bool SDL_SetGPUSwapchainParameters(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUSwapchainComposition swapchain_composition, SDL_GPUPresentMode present_mode);
+	 [CLink] public static extern void SDL_CopyGPUTextureToTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureLocation* source, SDL_GPUTextureLocation* destination, uint32 w, uint32 h, uint32 d, c_bool cycle);
 
-	[CLink] public static extern SDL_GPUTextureFormat SDL_GetGPUSwapchainTextureFormat(SDL_GPUDevice* device, SDL_Window* window);
+	 [CLink] public static extern void SDL_CopyGPUBufferToBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUBufferLocation* source, SDL_GPUBufferLocation* destination, uint32 size, c_bool cycle);
 
-	[CLink] public static extern c_bool SDL_AcquireGPUSwapchainTexture(SDL_GPUCommandBuffer* command_buffer, SDL_Window* window, SDL_GPUTexture** swapchain_texture, uint32* swapchain_texture_width, uint32* swapchain_texture_height);
+	 [CLink] public static extern void SDL_DownloadFromGPUTexture(SDL_GPUCopyPass* copy_pass, SDL_GPUTextureRegion* source, SDL_GPUTextureTransferInfo* destination);
 
-	[CLink] public static extern c_bool SDL_SubmitGPUCommandBuffer(SDL_GPUCommandBuffer* command_buffer);
+	 [CLink] public static extern void SDL_DownloadFromGPUBuffer(SDL_GPUCopyPass* copy_pass, SDL_GPUBufferRegion* source, SDL_GPUTransferBufferLocation* destination);
 
-	[CLink] public static extern SDL_GPUFence* SDL_SubmitGPUCommandBufferAndAcquireFence(SDL_GPUCommandBuffer* command_buffer);
+	 [CLink] public static extern void SDL_EndGPUCopyPass(SDL_GPUCopyPass* copy_pass);
 
-	[CLink] public static extern c_bool SDL_WaitForGPUIdle(SDL_GPUDevice* device);
+	 [CLink] public static extern void SDL_GenerateMipmapsForGPUTexture(SDL_GPUCommandBuffer* command_buffer, SDL_GPUTexture* texture);
 
-	[CLink] public static extern c_bool SDL_WaitForGPUFences(SDL_GPUDevice* device, c_bool wait_all, SDL_GPUFence** fences, uint32 num_fences);
+	 [CLink] public static extern void SDL_BlitGPUTexture(SDL_GPUCommandBuffer* command_buffer, SDL_GPUBlitInfo* info);
 
-	[CLink] public static extern c_bool SDL_QueryGPUFence(SDL_GPUDevice* device, SDL_GPUFence* fence);
+	 [CLink] public static extern c_bool SDL_WindowSupportsGPUSwapchainComposition(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUSwapchainComposition swapchain_composition);
 
-	[CLink] public static extern void SDL_ReleaseGPUFence(SDL_GPUDevice* device, SDL_GPUFence* fence);
+	 [CLink] public static extern c_bool SDL_WindowSupportsGPUPresentMode(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUPresentMode present_mode);
 
-	[CLink] public static extern uint32 SDL_GPUTextureFormatTexelBlockSize(SDL_GPUTextureFormat format);
+	 [CLink] public static extern c_bool SDL_ClaimWindowForGPUDevice(SDL_GPUDevice* device, SDL_Window* window);
 
-	[CLink] public static extern c_bool SDL_GPUTextureSupportsFormat(SDL_GPUDevice* device, SDL_GPUTextureFormat format, SDL_GPUTextureType type, SDL_GPUTextureUsageFlags usage);
+	 [CLink] public static extern void SDL_ReleaseWindowFromGPUDevice(SDL_GPUDevice* device, SDL_Window* window);
 
-	[CLink] public static extern c_bool SDL_GPUTextureSupportsSampleCount(SDL_GPUDevice* device, SDL_GPUTextureFormat format, SDL_GPUSampleCount sample_count);
+	 [CLink] public static extern c_bool SDL_SetGPUSwapchainParameters(SDL_GPUDevice* device, SDL_Window* window, SDL_GPUSwapchainComposition swapchain_composition, SDL_GPUPresentMode present_mode);
 
-	[CLink] public static extern uint32 SDL_CalculateGPUTextureFormatSize(SDL_GPUTextureFormat format, uint32 width, uint32 height, uint32 depth_or_layer_count);
+	 [CLink] public static extern SDL_GPUTextureFormat SDL_GetGPUSwapchainTextureFormat(SDL_GPUDevice* device, SDL_Window* window);
 
-	[CLink] public static extern void SDL_GDKSuspendGPU(SDL_GPUDevice* device);
+	 [CLink] public static extern c_bool SDL_AcquireGPUSwapchainTexture(SDL_GPUCommandBuffer* command_buffer, SDL_Window* window, SDL_GPUTexture** swapchain_texture, uint32* swapchain_texture_width, uint32* swapchain_texture_height);
 
-	[CLink] public static extern void SDL_GDKResumeGPU(SDL_GPUDevice* device);
+	 [CLink] public static extern c_bool SDL_SubmitGPUCommandBuffer(SDL_GPUCommandBuffer* command_buffer);
+
+	 [CLink] public static extern SDL_GPUFence* SDL_SubmitGPUCommandBufferAndAcquireFence(SDL_GPUCommandBuffer* command_buffer);
+
+	 [CLink] public static extern c_bool SDL_WaitForGPUIdle(SDL_GPUDevice* device);
+
+	 [CLink] public static extern c_bool SDL_WaitForGPUFences(SDL_GPUDevice* device, c_bool wait_all, SDL_GPUFence** fences, uint32 num_fences);
+
+	 [CLink] public static extern c_bool SDL_QueryGPUFence(SDL_GPUDevice* device, SDL_GPUFence* fence);
+
+	 [CLink] public static extern void SDL_ReleaseGPUFence(SDL_GPUDevice* device, SDL_GPUFence* fence);
+
+	 [CLink] public static extern uint32 SDL_GPUTextureFormatTexelBlockSize(SDL_GPUTextureFormat format);
+
+	 [CLink] public static extern c_bool SDL_GPUTextureSupportsFormat(SDL_GPUDevice* device, SDL_GPUTextureFormat format, SDL_GPUTextureType type, SDL_GPUTextureUsageFlags usage);
+
+	 [CLink] public static extern c_bool SDL_GPUTextureSupportsSampleCount(SDL_GPUDevice* device, SDL_GPUTextureFormat format, SDL_GPUSampleCount sample_count);
+
+	 [CLink] public static extern uint32 SDL_CalculateGPUTextureFormatSize(SDL_GPUTextureFormat format, uint32 width, uint32 height, uint32 depth_or_layer_count);
+
+	 [CLink] public static extern void SDL_GDKSuspendGPU(SDL_GPUDevice* device);
+
+	 [CLink] public static extern void SDL_GDKResumeGPU(SDL_GPUDevice* device);
+
+	 [CLink] public static extern c_bool SDL_SetGPUAllowedFramesInFlight(SDL_GPUDevice* device, uint32 allowed_frames_in_flight);
+
+	 [CLink] public static extern c_bool SDL_WaitForGPUSwapchain(SDL_GPUDevice* device, SDL_Window* window);
+
+	 [CLink] public static extern c_bool SDL_WaitAndAcquireGPUSwapchainTexture(SDL_GPUCommandBuffer* command_buffer, SDL_Window* window, SDL_GPUTexture** swapchain_texture, uint32* swapchain_texture_width, uint32* swapchain_texture_height);
+
+
+#if SDL_PLATFORM_GDK
+
+	 [CLink] public static extern void SDL_GDKSuspendGPU(SDL_GPUDevice *device);
+
+	 [CLink] public static extern void SDL_GDKResumeGPU(SDL_GPUDevice *device);
+#endif
 
 	//SDL_guid.h
 
@@ -2555,9 +2816,9 @@ static
 		public uint8[16] data;
 	}
 
-	[CLink] public static extern void SDL_GUIDToString(SDL_GUID guid, c_char* pszGUID, c_int cbGUID);
+	 [CLink] public static extern void SDL_GUIDToString(SDL_GUID guid, c_char* pszGUID, c_int cbGUID);
 
-	[CLink] public static extern SDL_GUID SDL_StringToGUID(c_char* pchGUID);
+	 [CLink] public static extern SDL_GUID SDL_StringToGUID(c_char* pchGUID);
 
 	//SDL_haptic.h
 
@@ -2565,6 +2826,57 @@ static
 
 	[CRepr]
 	public struct SDL_Haptic;
+
+
+	public const uint64 SDL_HAPTIC_CONSTANT     = (1u << 0);
+
+	public const uint64 SDL_HAPTIC_SINE         = (1u << 1);
+
+	public const uint64 SDL_HAPTIC_SQUARE       = (1u << 2);
+
+	public const uint64 SDL_HAPTIC_TRIANGLE     = (1u << 3);
+
+	public const uint64 SDL_HAPTIC_SAWTOOTHUP   = (1u << 4);
+
+	public const uint64 SDL_HAPTIC_SAWTOOTHDOWN = (1u << 5);
+
+	public const uint64 SDL_HAPTIC_RAMP         = (1u << 6);
+
+	public const uint64 SDL_HAPTIC_SPRING       = (1u << 7);
+
+	public const uint64 SDL_HAPTIC_DAMPER       = (1u << 8);
+
+	public const uint64 SDL_HAPTIC_INERTIA      = (1u << 9);
+
+	public const uint64 SDL_HAPTIC_FRICTION     = (1u << 10);
+
+	public const uint64 SDL_HAPTIC_LEFTRIGHT    = (1u << 11);
+
+	public const uint64 SDL_HAPTIC_RESERVED1    = (1u << 12);
+
+	public const uint64 SDL_HAPTIC_RESERVED2    = (1u << 13);
+
+	public const uint64 SDL_HAPTIC_RESERVED3    = (1u << 14);
+
+	public const uint64 SDL_HAPTIC_CUSTOM       = (1u << 15);
+
+	public const uint64 SDL_HAPTIC_GAIN       = (1u << 16);
+
+	public const uint64 SDL_HAPTIC_AUTOCENTER = (1u << 17);
+
+	public const uint64 SDL_HAPTIC_STATUS     = (1u << 18);
+
+	public const uint64 SDL_HAPTIC_PAUSE      = (1u << 19);
+
+	public const uint64 SDL_HAPTIC_POLAR      = 0;
+
+	public const uint64 SDL_HAPTIC_CARTESIAN  = 1;
+
+	public const uint64 SDL_HAPTIC_SPHERICAL  = 2;
+
+	public const uint64 SDL_HAPTIC_STEERING_AXIS = 3;
+
+	public const uint64 SDL_HAPTIC_INFINITY   = 4294967295U;
 
 	[CRepr, Union]
 	public struct SDL_HapticEffect
@@ -2608,7 +2920,7 @@ static
 	public struct SDL_HapticDirection
 	{
 		public uint8 type; /**< The type of encoding. */
-		public int32[3] dir; /**< The encoded direction. */
+		public c_int[3] dir; /**< The encoded direction. */
 	}
 
 	[CRepr]
@@ -2734,67 +3046,67 @@ static
 		public uint16 fade_level; /**< Level at the end of the fade. */
 	}
 
-	[CLink] public static extern SDL_HapticID* SDL_GetHaptics(c_int* count);
+	 [CLink] public static extern SDL_HapticID* SDL_GetHaptics(c_int* count);
 
-	[CLink] public static extern c_char* SDL_GetHapticNameForID(SDL_HapticID instance_id);
+	 [CLink] public static extern c_char* SDL_GetHapticNameForID(SDL_HapticID instance_id);
 
-	[CLink] public static extern SDL_Haptic* SDL_OpenHaptic(SDL_HapticID instance_id);
+	 [CLink] public static extern SDL_Haptic* SDL_OpenHaptic(SDL_HapticID instance_id);
 
-	[CLink] public static extern SDL_Haptic* SDL_GetHapticFromID(SDL_HapticID instance_id);
+	 [CLink] public static extern SDL_Haptic* SDL_GetHapticFromID(SDL_HapticID instance_id);
 
-	[CLink] public static extern SDL_HapticID SDL_GetHapticID(SDL_Haptic* haptic);
+	 [CLink] public static extern SDL_HapticID SDL_GetHapticID(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_char* SDL_GetHapticName(SDL_Haptic* haptic);
+	 [CLink] public static extern c_char* SDL_GetHapticName(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_IsMouseHaptic();
+	 [CLink] public static extern c_bool SDL_IsMouseHaptic();
 
-	[CLink] public static extern SDL_Haptic* SDL_OpenHapticFromMouse();
+	 [CLink] public static extern SDL_Haptic* SDL_OpenHapticFromMouse();
 
-	[CLink] public static extern c_bool SDL_IsJoystickHaptic(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_IsJoystickHaptic(SDL_Joystick* joystick);
 
-	[CLink] public static extern SDL_Haptic* SDL_OpenHapticFromJoystick(SDL_Joystick* joystick);
+	 [CLink] public static extern SDL_Haptic* SDL_OpenHapticFromJoystick(SDL_Joystick* joystick);
 
-	[CLink] public static extern void SDL_CloseHaptic(SDL_Haptic* haptic);
+	 [CLink] public static extern void SDL_CloseHaptic(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_int SDL_GetMaxHapticEffects(SDL_Haptic* haptic);
+	 [CLink] public static extern c_int SDL_GetMaxHapticEffects(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_int SDL_GetMaxHapticEffectsPlaying(SDL_Haptic* haptic);
+	 [CLink] public static extern c_int SDL_GetMaxHapticEffectsPlaying(SDL_Haptic* haptic);
 
-	[CLink] public static extern uint32 SDL_GetHapticFeatures(SDL_Haptic* haptic);
+	 [CLink] public static extern uint32 SDL_GetHapticFeatures(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_int SDL_GetNumHapticAxes(SDL_Haptic* haptic);
+	 [CLink] public static extern c_int SDL_GetNumHapticAxes(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_HapticEffectSupported(SDL_Haptic* haptic, SDL_HapticEffect* effect);
+	 [CLink] public static extern c_bool SDL_HapticEffectSupported(SDL_Haptic* haptic, SDL_HapticEffect* effect);
 
-	[CLink] public static extern c_int SDL_CreateHapticEffect(SDL_Haptic* haptic, SDL_HapticEffect* effect);
+	 [CLink] public static extern c_int SDL_CreateHapticEffect(SDL_Haptic* haptic, SDL_HapticEffect* effect);
 
-	[CLink] public static extern c_bool SDL_UpdateHapticEffect(SDL_Haptic* haptic, c_int effect, SDL_HapticEffect* data);
+	 [CLink] public static extern c_bool SDL_UpdateHapticEffect(SDL_Haptic* haptic, c_int effect, SDL_HapticEffect* data);
 
-	[CLink] public static extern c_bool SDL_RunHapticEffect(SDL_Haptic* haptic, c_int effect, uint32 iterations);
+	 [CLink] public static extern c_bool SDL_RunHapticEffect(SDL_Haptic* haptic, c_int effect, uint32 iterations);
 
-	[CLink] public static extern c_bool SDL_StopHapticEffect(SDL_Haptic* haptic, c_int effect);
+	 [CLink] public static extern c_bool SDL_StopHapticEffect(SDL_Haptic* haptic, c_int effect);
 
-	[CLink] public static extern void SDL_DestroyHapticEffect(SDL_Haptic* haptic, c_int effect);
+	 [CLink] public static extern void SDL_DestroyHapticEffect(SDL_Haptic* haptic, c_int effect);
 
-	[CLink] public static extern c_bool SDL_GetHapticEffectStatus(SDL_Haptic* haptic, c_int effect);
+	 [CLink] public static extern c_bool SDL_GetHapticEffectStatus(SDL_Haptic* haptic, c_int effect);
 
-	[CLink] public static extern c_bool SDL_SetHapticGain(SDL_Haptic* haptic, c_int gain);
+	 [CLink] public static extern c_bool SDL_SetHapticGain(SDL_Haptic* haptic, c_int gain);
 
-	[CLink] public static extern c_bool SDL_SetHapticAutocenter(SDL_Haptic* haptic, c_int autocenter);
+	 [CLink] public static extern c_bool SDL_SetHapticAutocenter(SDL_Haptic* haptic, c_int autocenter);
 
-	[CLink] public static extern c_bool SDL_PauseHaptic(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_PauseHaptic(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_ResumeHaptic(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_ResumeHaptic(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_StopHapticEffects(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_StopHapticEffects(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_HapticRumbleSupported(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_HapticRumbleSupported(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_InitHapticRumble(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_InitHapticRumble(SDL_Haptic* haptic);
 
-	[CLink] public static extern c_bool SDL_PlayHapticRumble(SDL_Haptic* haptic, float strength, uint32 length);
+	 [CLink] public static extern c_bool SDL_PlayHapticRumble(SDL_Haptic* haptic, float strength, uint32 length);
 
-	[CLink] public static extern c_bool SDL_StopHapticRumble(SDL_Haptic* haptic);
+	 [CLink] public static extern c_bool SDL_StopHapticRumble(SDL_Haptic* haptic);
 
 	//SDL_hidapi.h
 
@@ -2875,51 +3187,289 @@ static
 	[CRepr]
 	public struct SDL_hid_device;
 
-	[CLink] public static extern c_int SDL_hid_init();
+	 [CLink] public static extern c_int SDL_hid_init();
 
-	[CLink] public static extern c_int SDL_hid_exit();
+	 [CLink] public static extern c_int SDL_hid_exit();
 
-	[CLink] public static extern uint32 SDL_hid_device_change_count();
+	 [CLink] public static extern uint32 SDL_hid_device_change_count();
 
-	[CLink] public static extern SDL_hid_device_info* SDL_hid_enumerate(c_ushort vendor_id, c_ushort product_id);
+	 [CLink] public static extern SDL_hid_device_info* SDL_hid_enumerate(c_ushort vendor_id, c_ushort product_id);
 
-	[CLink] public static extern void SDL_hid_free_enumeration(SDL_hid_device_info* devs);
+	 [CLink] public static extern void SDL_hid_free_enumeration(SDL_hid_device_info* devs);
 
-	[CLink] public static extern SDL_hid_device* SDL_hid_open(c_ushort vendor_id, c_ushort product_id, c_wchar* serial_number);
+	 [CLink] public static extern SDL_hid_device* SDL_hid_open(c_ushort vendor_id, c_ushort product_id, c_wchar* serial_number);
 
-	[CLink] public static extern SDL_hid_device* SDL_hid_open_path(c_char* path);
+	 [CLink] public static extern SDL_hid_device* SDL_hid_open_path(c_char* path);
 
-	[CLink] public static extern c_int SDL_hid_write(SDL_hid_device* dev, c_uchar* data, c_size length);
+	 [CLink] public static extern c_int SDL_hid_write(SDL_hid_device* dev, c_uchar* data, c_size length);
 
-	[CLink] public static extern c_int SDL_hid_read_timeout(SDL_hid_device* dev, c_uchar* data, c_size length, c_int milliseconds);
+	 [CLink] public static extern c_int SDL_hid_read_timeout(SDL_hid_device* dev, c_uchar* data, c_size length, c_int milliseconds);
 
-	[CLink] public static extern c_int SDL_hid_read(SDL_hid_device* dev, c_uchar* data, c_size length);
+	 [CLink] public static extern c_int SDL_hid_read(SDL_hid_device* dev, c_uchar* data, c_size length);
 
-	[CLink] public static extern c_int SDL_hid_set_nonblocking(SDL_hid_device* dev, c_int nonblock);
+	 [CLink] public static extern c_int SDL_hid_set_nonblocking(SDL_hid_device* dev, c_int nonblock);
 
-	[CLink] public static extern c_int SDL_hid_send_feature_report(SDL_hid_device* dev, c_uchar* data, c_size length);
+	 [CLink] public static extern c_int SDL_hid_send_feature_report(SDL_hid_device* dev, c_uchar* data, c_size length);
 
-	[CLink] public static extern c_int SDL_hid_get_feature_report(SDL_hid_device* dev, c_uchar* data, c_size length);
+	 [CLink] public static extern c_int SDL_hid_get_feature_report(SDL_hid_device* dev, c_uchar* data, c_size length);
 
-	[CLink] public static extern c_int SDL_hid_get_input_report(SDL_hid_device* dev, c_uchar* data, c_size length);
+	 [CLink] public static extern c_int SDL_hid_get_input_report(SDL_hid_device* dev, c_uchar* data, c_size length);
 
-	[CLink] public static extern c_int SDL_hid_close(SDL_hid_device* dev);
+	 [CLink] public static extern c_int SDL_hid_close(SDL_hid_device* dev);
 
-	[CLink] public static extern c_int SDL_hid_get_manufacturer_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
+	 [CLink] public static extern c_int SDL_hid_get_manufacturer_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
 
-	[CLink] public static extern c_int SDL_hid_get_product_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
+	 [CLink] public static extern c_int SDL_hid_get_product_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
 
-	[CLink] public static extern c_int SDL_hid_get_serial_number_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
+	 [CLink] public static extern c_int SDL_hid_get_serial_number_string(SDL_hid_device* dev, c_wchar* string, c_size maxlen);
 
-	[CLink] public static extern c_int SDL_hid_get_indexed_string(SDL_hid_device* dev, c_int string_index, c_wchar* string, c_size maxlen);
+	 [CLink] public static extern c_int SDL_hid_get_indexed_string(SDL_hid_device* dev, c_int string_index, c_wchar* string, c_size maxlen);
 
-	[CLink] public static extern SDL_hid_device_info* SDL_hid_get_device_info(SDL_hid_device* dev);
+	 [CLink] public static extern SDL_hid_device_info* SDL_hid_get_device_info(SDL_hid_device* dev);
 
-	[CLink] public static extern c_int SDL_hid_get_report_descriptor(SDL_hid_device* dev, c_uchar* buf, c_size buf_size);
+	 [CLink] public static extern c_int SDL_hid_get_report_descriptor(SDL_hid_device* dev, c_uchar* buf, c_size buf_size);
 
-	[CLink] public static extern void SDL_hid_ble_scan(c_bool active);
+	 [CLink] public static extern void SDL_hid_ble_scan(c_bool active);
 
 	//SDL_hints.h
+
+	public const c_char* SDL_HINT_ALLOW_ALT_TAB_WHILE_GRABBED = "SDL_ALLOW_ALT_TAB_WHILE_GRABBED";
+	public const c_char* SDL_HINT_ANDROID_ALLOW_RECREATE_ACTIVITY = "SDL_ANDROID_ALLOW_RECREATE_ACTIVITY";
+	public const c_char* SDL_HINT_ANDROID_BLOCK_ON_PAUSE = "SDL_ANDROID_BLOCK_ON_PAUSE";
+	public const c_char* SDL_HINT_ANDROID_LOW_LATENCY_AUDIO = "SDL_ANDROID_LOW_LATENCY_AUDIO";
+	public const c_char* SDL_HINT_ANDROID_TRAP_BACK_BUTTON = "SDL_ANDROID_TRAP_BACK_BUTTON";
+	public const c_char* SDL_HINT_APP_ID = "SDL_APP_ID";
+	public const c_char* SDL_HINT_APP_NAME = "SDL_APP_NAME";
+	public const c_char* SDL_HINT_APPLE_TV_CONTROLLER_UI_EVENTS = "SDL_APPLE_TV_CONTROLLER_UI_EVENTS";
+	public const c_char* SDL_HINT_APPLE_TV_REMOTE_ALLOW_ROTATION = "SDL_APPLE_TV_REMOTE_ALLOW_ROTATION";
+	public const c_char* SDL_HINT_AUDIO_ALSA_DEFAULT_DEVICE = "SDL_AUDIO_ALSA_DEFAULT_DEVICE";
+	public const c_char* SDL_HINT_AUDIO_ALSA_DEFAULT_PLAYBACK_DEVICE = "SDL_AUDIO_ALSA_DEFAULT_PLAYBACK_DEVICE";
+	public const c_char* SDL_HINT_AUDIO_ALSA_DEFAULT_RECORDING_DEVICE = "SDL_AUDIO_ALSA_DEFAULT_RECORDING_DEVICE";
+	public const c_char* SDL_HINT_AUDIO_CATEGORY = "SDL_AUDIO_CATEGORY";
+	public const c_char* SDL_HINT_AUDIO_CHANNELS = "SDL_AUDIO_CHANNELS";
+	public const c_char* SDL_HINT_AUDIO_DEVICE_APP_ICON_NAME = "SDL_AUDIO_DEVICE_APP_ICON_NAME";
+	public const c_char* SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES = "SDL_AUDIO_DEVICE_SAMPLE_FRAMES";
+	public const c_char* SDL_HINT_AUDIO_DEVICE_STREAM_NAME = "SDL_AUDIO_DEVICE_STREAM_NAME";
+	public const c_char* SDL_HINT_AUDIO_DEVICE_STREAM_ROLE = "SDL_AUDIO_DEVICE_STREAM_ROLE";
+	public const c_char* SDL_HINT_AUDIO_DISK_INPUT_FILE = "SDL_AUDIO_DISK_INPUT_FILE";
+	public const c_char* SDL_HINT_AUDIO_DISK_OUTPUT_FILE = "SDL_AUDIO_DISK_OUTPUT_FILE";
+	public const c_char* SDL_HINT_AUDIO_DISK_TIMESCALE = "SDL_AUDIO_DISK_TIMESCALE";
+	public const c_char* SDL_HINT_AUDIO_DRIVER = "SDL_AUDIO_DRIVER";
+	public const c_char* SDL_HINT_AUDIO_DUMMY_TIMESCALE = "SDL_AUDIO_DUMMY_TIMESCALE";
+	public const c_char* SDL_HINT_AUDIO_FORMAT = "SDL_AUDIO_FORMAT";
+	public const c_char* SDL_HINT_AUDIO_FREQUENCY = "SDL_AUDIO_FREQUENCY";
+	public const c_char* SDL_HINT_AUDIO_INCLUDE_MONITORS = "SDL_AUDIO_INCLUDE_MONITORS";
+	public const c_char* SDL_HINT_AUTO_UPDATE_JOYSTICKS = "SDL_AUTO_UPDATE_JOYSTICKS";
+	public const c_char* SDL_HINT_AUTO_UPDATE_SENSORS = "SDL_AUTO_UPDATE_SENSORS";
+	public const c_char* SDL_HINT_BMP_SAVE_LEGACY_FORMAT = "SDL_BMP_SAVE_LEGACY_FORMAT";
+	public const c_char* SDL_HINT_CAMERA_DRIVER = "SDL_CAMERA_DRIVER";
+	public const c_char* SDL_HINT_CPU_FEATURE_MASK = "SDL_CPU_FEATURE_MASK";
+	public const c_char* SDL_HINT_JOYSTICK_DIRECTINPUT = "SDL_JOYSTICK_DIRECTINPUT";
+	public const c_char* SDL_HINT_FILE_DIALOG_DRIVER = "SDL_FILE_DIALOG_DRIVER";
+	public const c_char* SDL_HINT_DISPLAY_USABLE_BOUNDS = "SDL_DISPLAY_USABLE_BOUNDS";
+	public const c_char* SDL_HINT_EMSCRIPTEN_ASYNCIFY = "SDL_EMSCRIPTEN_ASYNCIFY";
+	public const c_char* SDL_HINT_EMSCRIPTEN_CANVAS_SELECTOR = "SDL_EMSCRIPTEN_CANVAS_SELECTOR";
+	public const c_char* SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT = "SDL_EMSCRIPTEN_KEYBOARD_ELEMENT";
+	public const c_char* SDL_HINT_ENABLE_SCREEN_KEYBOARD = "SDL_ENABLE_SCREEN_KEYBOARD";
+	public const c_char* SDL_HINT_EVDEV_DEVICES = "SDL_EVDEV_DEVICES";
+	public const c_char* SDL_HINT_EVENT_LOGGING = "SDL_EVENT_LOGGING";
+	public const c_char* SDL_HINT_FORCE_RAISEWINDOW = "SDL_FORCE_RAISEWINDOW";
+	public const c_char* SDL_HINT_FRAMEBUFFER_ACCELERATION = "SDL_FRAMEBUFFER_ACCELERATION";
+	public const c_char* SDL_HINT_GAMECONTROLLERCONFIG = "SDL_GAMECONTROLLERCONFIG";
+	public const c_char* SDL_HINT_GAMECONTROLLERCONFIG_FILE = "SDL_GAMECONTROLLERCONFIG_FILE";
+	public const c_char* SDL_HINT_GAMECONTROLLERTYPE = "SDL_GAMECONTROLLERTYPE";
+	public const c_char* SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES = "SDL_GAMECONTROLLER_IGNORE_DEVICES";
+	public const c_char* SDL_HINT_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT = "SDL_GAMECONTROLLER_IGNORE_DEVICES_EXCEPT";
+	public const c_char* SDL_HINT_GAMECONTROLLER_SENSOR_FUSION = "SDL_GAMECONTROLLER_SENSOR_FUSION";
+	public const c_char* SDL_HINT_GDK_TEXTINPUT_DEFAULT_TEXT = "SDL_GDK_TEXTINPUT_DEFAULT_TEXT";
+	public const c_char* SDL_HINT_GDK_TEXTINPUT_DESCRIPTION = "SDL_GDK_TEXTINPUT_DESCRIPTION";
+	public const c_char* SDL_HINT_GDK_TEXTINPUT_MAX_LENGTH = "SDL_GDK_TEXTINPUT_MAX_LENGTH";
+	public const c_char* SDL_HINT_GDK_TEXTINPUT_SCOPE = "SDL_GDK_TEXTINPUT_SCOPE";
+	public const c_char* SDL_HINT_GDK_TEXTINPUT_TITLE = "SDL_GDK_TEXTINPUT_TITLE";
+	public const c_char* SDL_HINT_HIDAPI_LIBUSB = "SDL_HIDAPI_LIBUSB";
+	public const c_char* SDL_HINT_HIDAPI_LIBUSB_WHITELIST = "SDL_HIDAPI_LIBUSB_WHITELIST";
+	public const c_char* SDL_HINT_HIDAPI_UDEV = "SDL_HIDAPI_UDEV";
+	public const c_char* SDL_HINT_GPU_DRIVER = "SDL_GPU_DRIVER";
+	public const c_char* SDL_HINT_HIDAPI_ENUMERATE_ONLY_CONTROLLERS = "SDL_HIDAPI_ENUMERATE_ONLY_CONTROLLERS";
+	public const c_char* SDL_HINT_HIDAPI_IGNORE_DEVICES = "SDL_HIDAPI_IGNORE_DEVICES";
+	public const c_char* SDL_HINT_IME_IMPLEMENTED_UI = "SDL_IME_IMPLEMENTED_UI";
+	public const c_char* SDL_HINT_IOS_HIDE_HOME_INDICATOR = "SDL_IOS_HIDE_HOME_INDICATOR";
+	public const c_char* SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS = "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS";
+	public const c_char* SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES = "SDL_JOYSTICK_ARCADESTICK_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_ARCADESTICK_DEVICES_EXCLUDED = "SDL_JOYSTICK_ARCADESTICK_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_BLACKLIST_DEVICES = "SDL_JOYSTICK_BLACKLIST_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_BLACKLIST_DEVICES_EXCLUDED = "SDL_JOYSTICK_BLACKLIST_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_DEVICE = "SDL_JOYSTICK_DEVICE";
+	public const c_char* SDL_HINT_JOYSTICK_ENHANCED_REPORTS = "SDL_JOYSTICK_ENHANCED_REPORTS";
+	public const c_char* SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES = "SDL_JOYSTICK_FLIGHTSTICK_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_FLIGHTSTICK_DEVICES_EXCLUDED = "SDL_JOYSTICK_FLIGHTSTICK_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_GAMEINPUT = "SDL_JOYSTICK_GAMEINPUT";
+	public const c_char* SDL_HINT_JOYSTICK_GAMECUBE_DEVICES = "SDL_JOYSTICK_GAMECUBE_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_GAMECUBE_DEVICES_EXCLUDED = "SDL_JOYSTICK_GAMECUBE_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI = "SDL_JOYSTICK_HIDAPI";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_COMBINE_JOY_CONS = "SDL_JOYSTICK_HIDAPI_COMBINE_JOY_CONS";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE = "SDL_JOYSTICK_HIDAPI_GAMECUBE";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_GAMECUBE_RUMBLE_BRAKE = "SDL_JOYSTICK_HIDAPI_GAMECUBE_RUMBLE_BRAKE";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_JOY_CONS = "SDL_JOYSTICK_HIDAPI_JOY_CONS";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_JOYCON_HOME_LED = "SDL_JOYSTICK_HIDAPI_JOYCON_HOME_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_LUNA = "SDL_JOYSTICK_HIDAPI_LUNA";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_NINTENDO_CLASSIC = "SDL_JOYSTICK_HIDAPI_NINTENDO_CLASSIC";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS3 = "SDL_JOYSTICK_HIDAPI_PS3";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER = "SDL_JOYSTICK_HIDAPI_PS3_SIXAXIS_DRIVER";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS4 = "SDL_JOYSTICK_HIDAPI_PS4";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS4_REPORT_INTERVAL = "SDL_JOYSTICK_HIDAPI_PS4_REPORT_INTERVAL";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS5 = "SDL_JOYSTICK_HIDAPI_PS5";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_PS5_PLAYER_LED = "SDL_JOYSTICK_HIDAPI_PS5_PLAYER_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_SHIELD = "SDL_JOYSTICK_HIDAPI_SHIELD";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_STADIA = "SDL_JOYSTICK_HIDAPI_STADIA";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_STEAM = "SDL_JOYSTICK_HIDAPI_STEAM";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_STEAM_HOME_LED = "SDL_JOYSTICK_HIDAPI_STEAM_HOME_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_STEAMDECK = "SDL_JOYSTICK_HIDAPI_STEAMDECK";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_STEAM_HORI = "SDL_JOYSTICK_HIDAPI_STEAM_HORI";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_SWITCH = "SDL_JOYSTICK_HIDAPI_SWITCH";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_SWITCH_HOME_LED = "SDL_JOYSTICK_HIDAPI_SWITCH_HOME_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_SWITCH_PLAYER_LED = "SDL_JOYSTICK_HIDAPI_SWITCH_PLAYER_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_VERTICAL_JOY_CONS = "SDL_JOYSTICK_HIDAPI_VERTICAL_JOY_CONS";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_WII = "SDL_JOYSTICK_HIDAPI_WII";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_WII_PLAYER_LED = "SDL_JOYSTICK_HIDAPI_WII_PLAYER_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX = "SDL_JOYSTICK_HIDAPI_XBOX";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX_360 = "SDL_JOYSTICK_HIDAPI_XBOX_360";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX_360_PLAYER_LED = "SDL_JOYSTICK_HIDAPI_XBOX_360_PLAYER_LED";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX_360_WIRELESS = "SDL_JOYSTICK_HIDAPI_XBOX_360_WIRELESS";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE = "SDL_JOYSTICK_HIDAPI_XBOX_ONE";
+	public const c_char* SDL_HINT_JOYSTICK_HIDAPI_XBOX_ONE_HOME_LED = "SDL_JOYSTICK_HIDAPI_XBOX_ONE_HOME_LED";
+	public const c_char* SDL_HINT_JOYSTICK_IOKIT = "SDL_JOYSTICK_IOKIT";
+	public const c_char* SDL_HINT_JOYSTICK_LINUX_CLASSIC = "SDL_JOYSTICK_LINUX_CLASSIC";
+	public const c_char* SDL_HINT_JOYSTICK_LINUX_DEADZONES = "SDL_JOYSTICK_LINUX_DEADZONES";
+	public const c_char* SDL_HINT_JOYSTICK_LINUX_DIGITAL_HATS = "SDL_JOYSTICK_LINUX_DIGITAL_HATS";
+	public const c_char* SDL_HINT_JOYSTICK_LINUX_HAT_DEADZONES = "SDL_JOYSTICK_LINUX_HAT_DEADZONES";
+	public const c_char* SDL_HINT_JOYSTICK_MFI = "SDL_JOYSTICK_MFI";
+	public const c_char* SDL_HINT_JOYSTICK_RAWINPUT = "SDL_JOYSTICK_RAWINPUT";
+	public const c_char* SDL_HINT_JOYSTICK_RAWINPUT_CORRELATE_XINPUT = "SDL_JOYSTICK_RAWINPUT_CORRELATE_XINPUT";
+	public const c_char* SDL_HINT_JOYSTICK_ROG_CHAKRAM = "SDL_JOYSTICK_ROG_CHAKRAM";
+	public const c_char* SDL_HINT_JOYSTICK_THREAD = "SDL_JOYSTICK_THREAD";
+	public const c_char* SDL_HINT_JOYSTICK_THROTTLE_DEVICES = "SDL_JOYSTICK_THROTTLE_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_THROTTLE_DEVICES_EXCLUDED = "SDL_JOYSTICK_THROTTLE_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_WGI = "SDL_JOYSTICK_WGI";
+	public const c_char* SDL_HINT_JOYSTICK_WHEEL_DEVICES = "SDL_JOYSTICK_WHEEL_DEVICES";
+	public const c_char* SDL_HINT_JOYSTICK_WHEEL_DEVICES_EXCLUDED = "SDL_JOYSTICK_WHEEL_DEVICES_EXCLUDED";
+	public const c_char* SDL_HINT_JOYSTICK_ZERO_CENTERED_DEVICES = "SDL_JOYSTICK_ZERO_CENTERED_DEVICES";
+	public const c_char* SDL_HINT_KEYCODE_OPTIONS = "SDL_KEYCODE_OPTIONS";
+	public const c_char* SDL_HINT_KMSDRM_DEVICE_INDEX = "SDL_KMSDRM_DEVICE_INDEX";
+	public const c_char* SDL_HINT_KMSDRM_REQUIRE_DRM_MASTER = "SDL_KMSDRM_REQUIRE_DRM_MASTER";
+	public const c_char* SDL_HINT_LOGGING = "SDL_LOGGING";
+	public const c_char* SDL_HINT_MAC_BACKGROUND_APP = "SDL_MAC_BACKGROUND_APP";
+	public const c_char* SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK = "SDL_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK";
+	public const c_char* SDL_HINT_MAC_OPENGL_ASYNC_DISPATCH = "SDL_MAC_OPENGL_ASYNC_DISPATCH";
+	public const c_char* SDL_HINT_MAC_OPTION_AS_ALT = "SDL_MAC_OPTION_AS_ALT";
+	public const c_char* SDL_HINT_MAC_SCROLL_MOMENTUM = "SDL_MAC_SCROLL_MOMENTUM";
+	public const c_char* SDL_HINT_MAIN_CALLBACK_RATE = "SDL_MAIN_CALLBACK_RATE";
+	public const c_char* SDL_HINT_MOUSE_AUTO_CAPTURE = "SDL_MOUSE_AUTO_CAPTURE";
+	public const c_char* SDL_HINT_MOUSE_DOUBLE_CLICK_RADIUS = "SDL_MOUSE_DOUBLE_CLICK_RADIUS";
+	public const c_char* SDL_HINT_MOUSE_DOUBLE_CLICK_TIME = "SDL_MOUSE_DOUBLE_CLICK_TIME";
+	public const c_char* SDL_HINT_MOUSE_DEFAULT_SYSTEM_CURSOR = "SDL_MOUSE_DEFAULT_SYSTEM_CURSOR";
+	public const c_char* SDL_HINT_MOUSE_EMULATE_WARP_WITH_RELATIVE = "SDL_MOUSE_EMULATE_WARP_WITH_RELATIVE";
+	public const c_char* SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH = "SDL_MOUSE_FOCUS_CLICKTHROUGH";
+	public const c_char* SDL_HINT_MOUSE_NORMAL_SPEED_SCALE = "SDL_MOUSE_NORMAL_SPEED_SCALE";
+	public const c_char* SDL_HINT_MOUSE_RELATIVE_MODE_CENTER = "SDL_MOUSE_RELATIVE_MODE_CENTER";
+	public const c_char* SDL_HINT_MOUSE_RELATIVE_SPEED_SCALE = "SDL_MOUSE_RELATIVE_SPEED_SCALE";
+	public const c_char* SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE = "SDL_MOUSE_RELATIVE_SYSTEM_SCALE";
+	public const c_char* SDL_HINT_MOUSE_RELATIVE_WARP_MOTION = "SDL_MOUSE_RELATIVE_WARP_MOTION";
+	public const c_char* SDL_HINT_MOUSE_RELATIVE_CURSOR_VISIBLE = "SDL_MOUSE_RELATIVE_CURSOR_VISIBLE";
+	public const c_char* SDL_HINT_MOUSE_TOUCH_EVENTS = "SDL_MOUSE_TOUCH_EVENTS";
+	public const c_char* SDL_HINT_MUTE_CONSOLE_KEYBOARD = "SDL_MUTE_CONSOLE_KEYBOARD";
+	public const c_char* SDL_HINT_NO_SIGNAL_HANDLERS = "SDL_NO_SIGNAL_HANDLERS";
+	public const c_char* SDL_HINT_OPENGL_LIBRARY = "SDL_OPENGL_LIBRARY";
+	public const c_char* SDL_HINT_EGL_LIBRARY = "SDL_EGL_LIBRARY";
+	public const c_char* SDL_HINT_OPENGL_ES_DRIVER = "SDL_OPENGL_ES_DRIVER";
+	public const c_char* SDL_HINT_OPENVR_LIBRARY              = "SDL_OPENVR_LIBRARY";
+	public const c_char* SDL_HINT_ORIENTATIONS = "SDL_ORIENTATIONS";
+	public const c_char* SDL_HINT_POLL_SENTINEL = "SDL_POLL_SENTINEL";
+	public const c_char* SDL_HINT_PREFERRED_LOCALES = "SDL_PREFERRED_LOCALES";
+	public const c_char* SDL_HINT_QUIT_ON_LAST_WINDOW_CLOSE = "SDL_QUIT_ON_LAST_WINDOW_CLOSE";
+	public const c_char* SDL_HINT_RENDER_DIRECT3D_THREADSAFE = "SDL_RENDER_DIRECT3D_THREADSAFE";
+	public const c_char* SDL_HINT_RENDER_DIRECT3D11_DEBUG = "SDL_RENDER_DIRECT3D11_DEBUG";
+	public const c_char* SDL_HINT_RENDER_VULKAN_DEBUG = "SDL_RENDER_VULKAN_DEBUG";
+	public const c_char* SDL_HINT_RENDER_GPU_DEBUG = "SDL_RENDER_GPU_DEBUG";
+	public const c_char* SDL_HINT_RENDER_GPU_LOW_POWER = "SDL_RENDER_GPU_LOW_POWER";
+	public const c_char* SDL_HINT_RENDER_DRIVER = "SDL_RENDER_DRIVER";
+	public const c_char* SDL_HINT_RENDER_LINE_METHOD = "SDL_RENDER_LINE_METHOD";
+	public const c_char* SDL_HINT_RENDER_METAL_PREFER_LOW_POWER_DEVICE = "SDL_RENDER_METAL_PREFER_LOW_POWER_DEVICE";
+	public const c_char* SDL_HINT_RENDER_VSYNC = "SDL_RENDER_VSYNC";
+	public const c_char* SDL_HINT_RETURN_KEY_HIDES_IME = "SDL_RETURN_KEY_HIDES_IME";
+	public const c_char* SDL_HINT_ROG_GAMEPAD_MICE = "SDL_ROG_GAMEPAD_MICE";
+	public const c_char* SDL_HINT_ROG_GAMEPAD_MICE_EXCLUDED = "SDL_ROG_GAMEPAD_MICE_EXCLUDED";
+	public const c_char* SDL_HINT_RPI_VIDEO_LAYER = "SDL_RPI_VIDEO_LAYER";
+	public const c_char* SDL_HINT_SCREENSAVER_INHIBIT_ACTIVITY_NAME = "SDL_SCREENSAVER_INHIBIT_ACTIVITY_NAME";
+	public const c_char* SDL_HINT_SHUTDOWN_DBUS_ON_QUIT = "SDL_SHUTDOWN_DBUS_ON_QUIT";
+	public const c_char* SDL_HINT_STORAGE_TITLE_DRIVER = "SDL_STORAGE_TITLE_DRIVER";
+	public const c_char* SDL_HINT_STORAGE_USER_DRIVER = "SDL_STORAGE_USER_DRIVER";
+	public const c_char* SDL_HINT_THREAD_FORCE_REALTIME_TIME_CRITICAL = "SDL_THREAD_FORCE_REALTIME_TIME_CRITICAL";
+	public const c_char* SDL_HINT_THREAD_PRIORITY_POLICY = "SDL_THREAD_PRIORITY_POLICY";
+	public const c_char* SDL_HINT_TIMER_RESOLUTION = "SDL_TIMER_RESOLUTION";
+	public const c_char* SDL_HINT_TOUCH_MOUSE_EVENTS = "SDL_TOUCH_MOUSE_EVENTS";
+	public const c_char* SDL_HINT_TRACKPAD_IS_TOUCH_ONLY = "SDL_TRACKPAD_IS_TOUCH_ONLY";
+	public const c_char* SDL_HINT_TV_REMOTE_AS_JOYSTICK = "SDL_TV_REMOTE_AS_JOYSTICK";
+	public const c_char* SDL_HINT_VIDEO_ALLOW_SCREENSAVER = "SDL_VIDEO_ALLOW_SCREENSAVER";
+	public const c_char* SDL_HINT_VIDEO_DISPLAY_PRIORITY = "SDL_VIDEO_DISPLAY_PRIORITY";
+	public const c_char* SDL_HINT_VIDEO_DOUBLE_BUFFER = "SDL_VIDEO_DOUBLE_BUFFER";
+	public const c_char* SDL_HINT_VIDEO_DRIVER = "SDL_VIDEO_DRIVER";
+	public const c_char* SDL_HINT_VIDEO_DUMMY_SAVE_FRAMES = "SDL_VIDEO_DUMMY_SAVE_FRAMES";
+	public const c_char* SDL_HINT_VIDEO_EGL_ALLOW_GETDISPLAY_FALLBACK = "SDL_VIDEO_EGL_ALLOW_GETDISPLAY_FALLBACK";
+	public const c_char* SDL_HINT_VIDEO_FORCE_EGL = "SDL_VIDEO_FORCE_EGL";
+	public const c_char* SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES = "SDL_VIDEO_MAC_FULLSCREEN_SPACES";
+	public const c_char* SDL_HINT_VIDEO_MAC_FULLSCREEN_MENU_VISIBILITY = "SDL_VIDEO_MAC_FULLSCREEN_MENU_VISIBILITY";
+	public const c_char* SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS = "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS";
+	public const c_char* SDL_HINT_VIDEO_OFFSCREEN_SAVE_FRAMES = "SDL_VIDEO_OFFSCREEN_SAVE_FRAMES";
+	public const c_char* SDL_HINT_VIDEO_SYNC_WINDOW_OPERATIONS = "SDL_VIDEO_SYNC_WINDOW_OPERATIONS";
+	public const c_char* SDL_HINT_VIDEO_WAYLAND_ALLOW_LIBDECOR = "SDL_VIDEO_WAYLAND_ALLOW_LIBDECOR";
+	public const c_char* SDL_HINT_VIDEO_WAYLAND_MODE_EMULATION = "SDL_VIDEO_WAYLAND_MODE_EMULATION";
+	public const c_char* SDL_HINT_VIDEO_WAYLAND_MODE_SCALING = "SDL_VIDEO_WAYLAND_MODE_SCALING";
+	public const c_char* SDL_HINT_VIDEO_WAYLAND_PREFER_LIBDECOR = "SDL_VIDEO_WAYLAND_PREFER_LIBDECOR";
+	public const c_char* SDL_HINT_VIDEO_WAYLAND_SCALE_TO_DISPLAY = "SDL_VIDEO_WAYLAND_SCALE_TO_DISPLAY";
+	public const c_char* SDL_HINT_VIDEO_WIN_D3DCOMPILER = "SDL_VIDEO_WIN_D3DCOMPILER";
+	public const c_char* SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR = "SDL_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR";
+	public const c_char* SDL_HINT_VIDEO_X11_NET_WM_PING = "SDL_VIDEO_X11_NET_WM_PING";
+	public const c_char* SDL_HINT_VIDEO_X11_NODIRECTCOLOR = "SDL_VIDEO_X11_NODIRECTCOLOR";
+	public const c_char* SDL_HINT_VIDEO_X11_SCALING_FACTOR = "SDL_VIDEO_X11_SCALING_FACTOR";
+	public const c_char* SDL_HINT_VIDEO_X11_VISUALID = "SDL_VIDEO_X11_VISUALID";
+	public const c_char* SDL_HINT_VIDEO_X11_WINDOW_VISUALID = "SDL_VIDEO_X11_WINDOW_VISUALID";
+	public const c_char* SDL_HINT_VIDEO_X11_XRANDR = "SDL_VIDEO_X11_XRANDR";
+	public const c_char* SDL_HINT_VITA_ENABLE_BACK_TOUCH = "SDL_VITA_ENABLE_BACK_TOUCH";
+	public const c_char* SDL_HINT_VITA_ENABLE_FRONT_TOUCH = "SDL_VITA_ENABLE_FRONT_TOUCH";
+	public const c_char* SDL_HINT_VITA_MODULE_PATH = "SDL_VITA_MODULE_PATH";
+	public const c_char* SDL_HINT_VITA_PVR_INIT = "SDL_VITA_PVR_INIT";
+	public const c_char* SDL_HINT_VITA_RESOLUTION = "SDL_VITA_RESOLUTION";
+	public const c_char* SDL_HINT_VITA_PVR_OPENGL = "SDL_VITA_PVR_OPENGL";
+	public const c_char* SDL_HINT_VITA_TOUCH_MOUSE_DEVICE = "SDL_VITA_TOUCH_MOUSE_DEVICE";
+	public const c_char* SDL_HINT_VULKAN_DISPLAY = "SDL_VULKAN_DISPLAY";
+	public const c_char* SDL_HINT_VULKAN_LIBRARY = "SDL_VULKAN_LIBRARY";
+	public const c_char* SDL_HINT_WAVE_FACT_CHUNK = "SDL_WAVE_FACT_CHUNK";
+	public const c_char* SDL_HINT_WAVE_CHUNK_LIMIT = "SDL_WAVE_CHUNK_LIMIT";
+	public const c_char* SDL_HINT_WAVE_RIFF_CHUNK_SIZE = "SDL_WAVE_RIFF_CHUNK_SIZE";
+	public const c_char* SDL_HINT_WAVE_TRUNCATION = "SDL_WAVE_TRUNCATION";
+	public const c_char* SDL_HINT_WINDOW_ACTIVATE_WHEN_RAISED = "SDL_WINDOW_ACTIVATE_WHEN_RAISED";
+	public const c_char* SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN = "SDL_WINDOW_ACTIVATE_WHEN_SHOWN";
+	public const c_char* SDL_HINT_WINDOW_ALLOW_TOPMOST = "SDL_WINDOW_ALLOW_TOPMOST";
+	public const c_char* SDL_HINT_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN = "SDL_WINDOW_FRAME_USABLE_WHILE_CURSOR_HIDDEN";
+	public const c_char* SDL_HINT_WINDOWS_CLOSE_ON_ALT_F4 = "SDL_WINDOWS_CLOSE_ON_ALT_F4";
+	public const c_char* SDL_HINT_WINDOWS_ENABLE_MENU_MNEMONICS = "SDL_WINDOWS_ENABLE_MENU_MNEMONICS";
+	public const c_char* SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP = "SDL_WINDOWS_ENABLE_MESSAGELOOP";
+	public const c_char* SDL_HINT_WINDOWS_GAMEINPUT   = "SDL_WINDOWS_GAMEINPUT";
+	public const c_char* SDL_HINT_WINDOWS_RAW_KEYBOARD = "SDL_WINDOWS_RAW_KEYBOARD";
+	public const c_char* SDL_HINT_WINDOWS_FORCE_SEMAPHORE_KERNEL = "SDL_WINDOWS_FORCE_SEMAPHORE_KERNEL";
+	public const c_char* SDL_HINT_WINDOWS_INTRESOURCE_ICON       = "SDL_WINDOWS_INTRESOURCE_ICON";
+	public const c_char* SDL_HINT_WINDOWS_INTRESOURCE_ICON_SMALL = "SDL_WINDOWS_INTRESOURCE_ICON_SMALL";
+	public const c_char* SDL_HINT_WINDOWS_USE_D3D9EX = "SDL_WINDOWS_USE_D3D9EX";
+	public const c_char* SDL_HINT_WINDOWS_ERASE_BACKGROUND_MODE = "SDL_WINDOWS_ERASE_BACKGROUND_MODE";
+	public const c_char* SDL_HINT_X11_FORCE_OVERRIDE_REDIRECT = "SDL_X11_FORCE_OVERRIDE_REDIRECT";
+	public const c_char* SDL_HINT_X11_WINDOW_TYPE = "SDL_X11_WINDOW_TYPE";
+	public const c_char* SDL_HINT_X11_XCB_LIBRARY = "SDL_X11_XCB_LIBRARY";
+	public const c_char* SDL_HINT_XINPUT_ENABLED = "SDL_XINPUT_ENABLED";
+	public const c_char* SDL_HINT_ASSERT = "SDL_ASSERT";
+	public const c_char* SDL_HINT_PEN_MOUSE_EVENTS = "SDL_PEN_MOUSE_EVENTS";
+	public const c_char* SDL_HINT_PEN_TOUCH_EVENTS = "SDL_PEN_TOUCH_EVENTS";
+
 
 	public enum SDL_HintPriority : c_int
 	{
@@ -2930,21 +3480,21 @@ static
 
 	typealias SDL_HintCallback = function void(void* userdata, c_char* name, c_char* oldValue, c_char* newValue);
 
-	[CLink] public static extern c_bool SDL_SetHintWithPriority(c_char* name, c_char* value, SDL_HintPriority priority);
+	 [CLink] public static extern c_bool SDL_SetHintWithPriority(c_char* name, c_char* value, SDL_HintPriority priority);
 
-	[CLink] public static extern c_bool SDL_SetHint(c_char* name, c_char* value);
+	 [CLink] public static extern c_bool SDL_SetHint(c_char* name, c_char* value);
 
-	[CLink] public static extern c_bool SDL_ResetHint(c_char* name);
+	 [CLink] public static extern c_bool SDL_ResetHint(c_char* name);
 
-	[CLink] public static extern void SDL_ResetHints();
+	 [CLink] public static extern void SDL_ResetHints();
 
-	[CLink] public static extern c_char* SDL_GetHint(c_char* name);
+	 [CLink] public static extern c_char* SDL_GetHint(c_char* name);
 
-	[CLink] public static extern c_bool SDL_GetHintBoolean(c_char* name, bool default_value);
+	 [CLink] public static extern c_bool SDL_GetHintBoolean(c_char* name, c_bool default_value);
 
-	[CLink] public static extern c_bool SDL_AddHintCallback(c_char* name, SDL_HintCallback callback, void* userdata);
+	 [CLink] public static extern c_bool SDL_AddHintCallback(c_char* name, SDL_HintCallback callback, void* userdata);
 
-	[CLink] public static extern void SDL_RemoveHintCallback(c_char* name, SDL_HintCallback callback, void* userdata);
+	 [CLink] public static extern void SDL_RemoveHintCallback(c_char* name, SDL_HintCallback callback, void* userdata);
 
 	//SDL_init.h
 
@@ -2960,21 +3510,35 @@ static
 		SDL_INIT_CAMERA     = 0x00010000u /**< `SDL_INIT_CAMERA` implies `SDL_INIT_EVENTS` */
 	}
 
-	[CLink] public static extern c_bool SDL_Init(SDL_InitFlags flags);
+	public typealias SDL_MainThreadCallback = function void(void* userdata);
 
-	[CLink] public static extern c_bool SDL_InitSubSystem(SDL_InitFlags flags);
+	public const c_char* SDL_PROP_APP_METADATA_NAME_STRING = "SDL.app.metadata.name";
+	public const c_char* SDL_PROP_APP_METADATA_VERSION_STRING = "SDL.app.metadata.version";
+	public const c_char* SDL_PROP_APP_METADATA_IDENTIFIER_STRING = "SDL.app.metadata.identifier";
+	public const c_char* SDL_PROP_APP_METADATA_CREATOR_STRING = "SDL.app.metadata.creator";
+	public const c_char* SDL_PROP_APP_METADATA_COPYRIGHT_STRING = "SDL.app.metadata.copyright";
+	public const c_char* SDL_PROP_APP_METADATA_URL_STRING = "SDL.app.metadata.url";
+	public const c_char* SDL_PROP_APP_METADATA_TYPE_STRING = "SDL.app.metadata.type";
 
-	[CLink] public static extern void SDL_QuitSubSystem(SDL_InitFlags flags);
+	 [CLink] public static extern c_bool SDL_Init(SDL_InitFlags flags);
 
-	[CLink] public static extern SDL_InitFlags SDL_WasInit(SDL_InitFlags flags);
+	 [CLink] public static extern c_bool SDL_InitSubSystem(SDL_InitFlags flags);
 
-	[CLink] public static extern void SDL_Quit();
+	 [CLink] public static extern void SDL_QuitSubSystem(SDL_InitFlags flags);
 
-	[CLink] public static extern c_bool SDL_SetAppMetadata(c_char* appname, c_char* appversion, c_char* appidentifier);
+	 [CLink] public static extern SDL_InitFlags SDL_WasInit(SDL_InitFlags flags);
 
-	[CLink] public static extern c_bool SDL_SetAppMetadataProperty(c_char* name, c_char* value);
+	 [CLink] public static extern void SDL_Quit();
 
-	[CLink] public static extern c_char* SDL_GetAppMetadataProperty(c_char* name);
+	 [CLink] public static extern c_bool SDL_SetAppMetadata(c_char* appname, c_char* appversion, c_char* appidentifier);
+
+	 [CLink] public static extern c_bool SDL_SetAppMetadataProperty(c_char* name, c_char* value);
+
+	 [CLink] public static extern c_char* SDL_GetAppMetadataProperty(c_char* name);
+
+	 [CLink] public static extern c_bool SDL_IsMainThread();
+
+	 [CLink] public static extern c_bool SDL_RunOnMainThread(SDL_MainThreadCallback callback, void* userdata, c_bool wait_complete);
 
 	//SDL_iostream.h
 
@@ -3032,7 +3596,7 @@ static
 		 *
 		 *  \return true if successful or false on write error when flushing data.
 		 */
-		public function bool(void* userdata, SDL_IOStatus* status) flush;
+		public function c_bool(void* userdata, SDL_IOStatus* status) flush;
 
 		/**
 		 *  Close and free any allocated resources.
@@ -3045,7 +3609,7 @@ static
 		 *
 		 *  \return true if successful or false on write error when flushing data.
 		 */
-		public function bool(void* userdata) close;
+		public function c_bool(void* userdata) close;
 	}
 
 	public enum SDL_IOWhence : c_int
@@ -3065,101 +3629,116 @@ static
 		SDL_IO_STATUS_WRITEONLY /**< Tried to read a write-only buffer */
 	}
 
- 	[CLink] public static extern c_bool SDL_SaveFile_IO(SDL_IOStream* src, void* data, c_size datasize, c_bool closeio);
+	private static void Assert_SDL_IOStreamInterface_SIZE()
+	{
+		Compiler.Assert((sizeof(void*) == 4 && sizeof(SDL_IOStreamInterface) == 28) ||
+			(sizeof(void*) == 8 && sizeof(SDL_IOStreamInterface) == 56));
+	}
 
-  	[CLink] public static extern c_bool SDL_SaveFile(c_char* file, void* data, c_size datasize);
+	public const c_char* SDL_PROP_IOSTREAM_WINDOWS_HANDLE_POINTER    = "SDL.iostream.windows.handle";
+	public const c_char* SDL_PROP_IOSTREAM_STDIO_FILE_POINTER        = "SDL.iostream.stdio.file";
+	public const c_char* SDL_PROP_IOSTREAM_FILE_DESCRIPTOR_NUMBER    = "SDL.iostream.file_descriptor";
+	public const c_char* SDL_PROP_IOSTREAM_ANDROID_AASSET_POINTER    = "SDL.iostream.android.aasset";
+	public const c_char* SDL_PROP_IOSTREAM_MEMORY_POINTER = "SDL.iostream.memory.base";
+	public const c_char* SDL_PROP_IOSTREAM_MEMORY_SIZE_NUMBER  = "SDL.iostream.memory.size";
+	public const c_char* SDL_PROP_IOSTREAM_DYNAMIC_MEMORY_POINTER    = "SDL.iostream.dynamic.memory";
+	public const c_char* SDL_PROP_IOSTREAM_DYNAMIC_CHUNKSIZE_NUMBER  = "SDL.iostream.dynamic.chunksize";
 
-	[CLink] public static extern SDL_IOStream* SDL_IOFromFile(c_char* file, c_char* mode);
+	 [CLink] public static extern c_bool SDL_SaveFile_IO(SDL_IOStream* src, void* data, c_size datasize, c_bool closeio);
 
-	[CLink] public static extern SDL_IOStream* SDL_IOFromMem(void* mem, c_size size);
+	 [CLink] public static extern c_bool SDL_SaveFile(c_char* file, void* data, c_size datasize);
 
-	[CLink] public static extern SDL_IOStream* SDL_IOFromConstMem(void* mem, c_size size);
+	 [CLink] public static extern SDL_IOStream* SDL_IOFromFile(c_char* file, c_char* mode);
 
-	[CLink] public static extern SDL_IOStream* SDL_IOFromDynamicMem();
+	 [CLink] public static extern SDL_IOStream* SDL_IOFromMem(void* mem, c_size size);
 
-	[CLink] public static extern SDL_IOStream* SDL_OpenIO(SDL_IOStreamInterface* iface, void* userdata);
+	 [CLink] public static extern SDL_IOStream* SDL_IOFromConstMem(void* mem, c_size size);
 
-	[CLink] public static extern c_bool SDL_CloseIO(SDL_IOStream* context);
+	 [CLink] public static extern SDL_IOStream* SDL_IOFromDynamicMem();
 
-	[CLink] public static extern SDL_PropertiesID SDL_GetIOProperties(SDL_IOStream* context);
+	 [CLink] public static extern SDL_IOStream* SDL_OpenIO(SDL_IOStreamInterface* iface, void* userdata);
 
-	[CLink] public static extern SDL_IOStatus SDL_GetIOStatus(SDL_IOStream* context);
+	 [CLink] public static extern c_bool SDL_CloseIO(SDL_IOStream* context);
 
-	[CLink] public static extern int64 SDL_GetIOSize(SDL_IOStream* context);
+	 [CLink] public static extern SDL_PropertiesID SDL_GetIOProperties(SDL_IOStream* context);
 
-	[CLink] public static extern int64 SDL_SeekIO(SDL_IOStream* context, int64 offset, SDL_IOWhence whence);
+	 [CLink] public static extern SDL_IOStatus SDL_GetIOStatus(SDL_IOStream* context);
 
-	[CLink] public static extern int64 SDL_TellIO(SDL_IOStream* context);
+	 [CLink] public static extern int64 SDL_GetIOSize(SDL_IOStream* context);
 
-	[CLink] public static extern c_size SDL_ReadIO(SDL_IOStream* context, void* ptr, c_size size);
+	 [CLink] public static extern int64 SDL_SeekIO(SDL_IOStream* context, int64 offset, SDL_IOWhence whence);
 
-	[CLink] public static extern c_size SDL_WriteIO(SDL_IOStream* context, void* ptr, c_size size);
+	 [CLink] public static extern int64 SDL_TellIO(SDL_IOStream* context);
 
-	[CLink] public static extern c_size SDL_IOprintf(SDL_IOStream* context, c_char* fmt, ...);
+	 [CLink] public static extern c_size SDL_ReadIO(SDL_IOStream* context, void* ptr, c_size size);
 
-	[CLink] public static extern c_size SDL_IOvprintf(SDL_IOStream* context, c_char* fmt, VarArgs ap);
+	 [CLink] public static extern c_size SDL_WriteIO(SDL_IOStream* context, void* ptr, c_size size);
 
-	[CLink] public static extern c_bool SDL_FlushIO(SDL_IOStream* context);
+	 [CLink] public static extern c_size SDL_IOprintf(SDL_IOStream* context, c_char* fmt, ...);
 
-	[CLink] public static extern void*  SDL_LoadFile_IO(SDL_IOStream* src, c_size* datasize, c_bool closeio);
+	 [CLink] public static extern c_size SDL_IOvprintf(SDL_IOStream* context, c_char* fmt, VarArgs ap);
 
-	[CLink] public static extern void*  SDL_LoadFile(c_char* file, c_size* datasize);
+	 [CLink] public static extern c_bool SDL_FlushIO(SDL_IOStream* context);
 
-	[CLink] public static extern c_bool SDL_ReadU8(SDL_IOStream* src, uint8* value);
+	 [CLink] public static extern void*  SDL_LoadFile_IO(SDL_IOStream* src, c_size* datasize, c_bool closeio);
 
-	[CLink] public static extern c_bool SDL_ReadS8(SDL_IOStream* src, int8* value);
+	 [CLink] public static extern void*  SDL_LoadFile(c_char* file, c_size* datasize);
 
-	[CLink] public static extern c_bool SDL_ReadU16LE(SDL_IOStream* src, uint16* value);
+	 [CLink] public static extern c_bool SDL_ReadU8(SDL_IOStream* src, uint8* value);
 
-	[CLink] public static extern c_bool SDL_ReadS16LE(SDL_IOStream* src, int16* value);
+	 [CLink] public static extern c_bool SDL_ReadS8(SDL_IOStream* src, int8* value);
 
-	[CLink] public static extern c_bool SDL_ReadU16BE(SDL_IOStream* src, uint16* value);
+	 [CLink] public static extern c_bool SDL_ReadU16LE(SDL_IOStream* src, uint16* value);
 
-	[CLink] public static extern c_bool SDL_ReadS16BE(SDL_IOStream* src, int16* value);
+	 [CLink] public static extern c_bool SDL_ReadS16LE(SDL_IOStream* src, int16* value);
 
-	[CLink] public static extern c_bool SDL_ReadU32LE(SDL_IOStream* src, uint32* value);
+	 [CLink] public static extern c_bool SDL_ReadU16BE(SDL_IOStream* src, uint16* value);
 
-	[CLink] public static extern c_bool SDL_ReadS32LE(SDL_IOStream* src, int32* value);
+	 [CLink] public static extern c_bool SDL_ReadS16BE(SDL_IOStream* src, int16* value);
 
-	[CLink] public static extern c_bool SDL_ReadU32BE(SDL_IOStream* src, uint32* value);
+	 [CLink] public static extern c_bool SDL_ReadU32LE(SDL_IOStream* src, uint32* value);
 
-	[CLink] public static extern c_bool SDL_ReadS32BE(SDL_IOStream* src, int32* value);
+	 [CLink] public static extern c_bool SDL_ReadS32LE(SDL_IOStream* src, c_int* value);
 
-	[CLink] public static extern c_bool SDL_ReadU64LE(SDL_IOStream* src, uint64* value);
+	 [CLink] public static extern c_bool SDL_ReadU32BE(SDL_IOStream* src, uint32* value);
 
-	[CLink] public static extern c_bool SDL_ReadS64LE(SDL_IOStream* src, int64* value);
+	 [CLink] public static extern c_bool SDL_ReadS32BE(SDL_IOStream* src, c_int* value);
 
-	[CLink] public static extern c_bool SDL_ReadU64BE(SDL_IOStream* src, uint64* value);
+	 [CLink] public static extern c_bool SDL_ReadU64LE(SDL_IOStream* src, uint64* value);
 
-	[CLink] public static extern c_bool SDL_ReadS64BE(SDL_IOStream* src, int64* value);
+	 [CLink] public static extern c_bool SDL_ReadS64LE(SDL_IOStream* src, int64* value);
 
-	[CLink] public static extern c_bool SDL_WriteU8(SDL_IOStream* dst, uint8 value);
+	 [CLink] public static extern c_bool SDL_ReadU64BE(SDL_IOStream* src, uint64* value);
 
-	[CLink] public static extern c_bool SDL_WriteS8(SDL_IOStream* dst, int8 value);
+	 [CLink] public static extern c_bool SDL_ReadS64BE(SDL_IOStream* src, int64* value);
 
-	[CLink] public static extern c_bool SDL_WriteU16LE(SDL_IOStream* dst, uint16 value);
+	 [CLink] public static extern c_bool SDL_WriteU8(SDL_IOStream* dst, uint8 value);
 
-	[CLink] public static extern c_bool SDL_WriteS16LE(SDL_IOStream* dst, int16 value);
+	 [CLink] public static extern c_bool SDL_WriteS8(SDL_IOStream* dst, int8 value);
 
-	[CLink] public static extern c_bool SDL_WriteU16BE(SDL_IOStream* dst, uint16 value);
+	 [CLink] public static extern c_bool SDL_WriteU16LE(SDL_IOStream* dst, uint16 value);
 
-	[CLink] public static extern c_bool SDL_WriteS16BE(SDL_IOStream* dst, int16 value);
+	 [CLink] public static extern c_bool SDL_WriteS16LE(SDL_IOStream* dst, int16 value);
 
-	[CLink] public static extern c_bool SDL_WriteU32LE(SDL_IOStream* dst, uint32 value);
+	 [CLink] public static extern c_bool SDL_WriteU16BE(SDL_IOStream* dst, uint16 value);
 
-	[CLink] public static extern c_bool SDL_WriteS32LE(SDL_IOStream* dst, int32 value);
+	 [CLink] public static extern c_bool SDL_WriteS16BE(SDL_IOStream* dst, int16 value);
 
-	[CLink] public static extern c_bool SDL_WriteU32BE(SDL_IOStream* dst, uint32 value);
+	 [CLink] public static extern c_bool SDL_WriteU32LE(SDL_IOStream* dst, uint32 value);
 
-	[CLink] public static extern c_bool SDL_WriteS32BE(SDL_IOStream* dst, int32 value);
+	 [CLink] public static extern c_bool SDL_WriteS32LE(SDL_IOStream* dst, c_int value);
 
-	[CLink] public static extern c_bool SDL_WriteU64LE(SDL_IOStream* dst, uint64 value);
+	 [CLink] public static extern c_bool SDL_WriteU32BE(SDL_IOStream* dst, uint32 value);
 
-	[CLink] public static extern c_bool SDL_WriteS64LE(SDL_IOStream* dst, int64 value);
+	 [CLink] public static extern c_bool SDL_WriteS32BE(SDL_IOStream* dst, c_int value);
 
-	[CLink] public static extern c_bool SDL_WriteU64BE(SDL_IOStream* dst, uint64 value);
+	 [CLink] public static extern c_bool SDL_WriteU64LE(SDL_IOStream* dst, uint64 value);
 
-	[CLink] public static extern c_bool SDL_WriteS64BE(SDL_IOStream* dst, int64 value);
+	 [CLink] public static extern c_bool SDL_WriteS64LE(SDL_IOStream* dst, int64 value);
+
+	 [CLink] public static extern c_bool SDL_WriteU64BE(SDL_IOStream* dst, uint64 value);
+
+	 [CLink] public static extern c_bool SDL_WriteS64BE(SDL_IOStream* dst, int64 value);
 
 	//SDL_joystick.h
 
@@ -3209,11 +3788,11 @@ static
 		public void* userdata; /**< User data pointer passed to callbacks */
 		public function void(void* userdata) Update; /**< Called when the joystick state should be updated */
 		public function void(void* userdata, c_int player_index) SetPlayerIndex; /**< Called when the player index is set */
-		public function bool(void* userdata, uint16 low_frequency_rumble, uint16 high_frequency_rumble) Rumble; /**< Implements SDL_RumbleJoystick() */
-		public function bool(void* userdata, uint16 left_rumble, uint16 right_rumble) RumbleTriggers; /**< Implements SDL_RumbleJoystickTriggers() */
-		public function bool(void* userdata, uint8 red, uint8 green, uint8 blue) SetLED; /**< Implements SDL_SetJoystickLED() */
-		public function bool(void* userdata, void* data, c_int size) SendEffect; /**< Implements SDL_SendJoystickEffect() */
-		public function bool(void* userdata, c_bool enabled) SetSensorsEnabled; /**< Implements SDL_SetGamepadSensorEnabled() */
+		public function c_bool(void* userdata, uint16 low_frequency_rumble, uint16 high_frequency_rumble) Rumble; /**< Implements SDL_RumbleJoystick() */
+		public function c_bool(void* userdata, uint16 left_rumble, uint16 right_rumble) RumbleTriggers; /**< Implements SDL_RumbleJoystickTriggers() */
+		public function c_bool(void* userdata, uint8 red, uint8 green, uint8 blue) SetLED; /**< Implements SDL_SetJoystickLED() */
+		public function c_bool(void* userdata, void* data, c_int size) SendEffect; /**< Implements SDL_SendJoystickEffect() */
+		public function c_bool(void* userdata, c_bool enabled) SetSensorsEnabled; /**< Implements SDL_SetGamepadSensorEnabled() */
 		public function void(void* userdata) Cleanup; /**< Cleans up the userdata when the joystick is detached */
 	}
 
@@ -3239,173 +3818,234 @@ static
 		SDL_JOYSTICK_CONNECTION_WIRELESS
 	}
 
-	[CLink] public static extern void SDL_LockJoysticks();
+	public const c_int SDL_JOYSTICK_AXIS_MAX   = 32767;
+	public const c_int SDL_JOYSTICK_AXIS_MIN   = -32768;
 
-	[CLink] public static extern void SDL_UnlockJoysticks();
+	private static void Assert_SDL_VirtualJoystickDesc_SIZE()
+	{
+		Compiler.Assert((sizeof(void*) == 4 && sizeof(SDL_VirtualJoystickDesc) == 84) ||
+			(sizeof(void*) == 8 && sizeof(SDL_VirtualJoystickDesc) == 136));
+	}
 
-	[CLink] public static extern bool SDL_HasJoystick();
+	public const c_char* SDL_PROP_JOYSTICK_CAP_MONO_LED_BOOLEAN          = "SDL.joystick.cap.mono_led";
+	public const c_char* SDL_PROP_JOYSTICK_CAP_RGB_LED_BOOLEAN           = "SDL.joystick.cap.rgb_led";
+	public const c_char* SDL_PROP_JOYSTICK_CAP_PLAYER_LED_BOOLEAN        = "SDL.joystick.cap.player_led";
+	public const c_char* SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN            = "SDL.joystick.cap.rumble";
+	public const c_char* SDL_PROP_JOYSTICK_CAP_TRIGGER_RUMBLE_BOOLEAN    = "SDL.joystick.cap.trigger_rumble";
 
-	[CLink] public static extern SDL_JoystickID*  SDL_GetJoysticks(c_int* count);
+	public enum SDL_HAT : uint32
+	{
+		SDL_HAT_CENTERED    = 0x00,
+		SDL_HAT_UP          = 0x01,
+		SDL_HAT_RIGHT       = 0x02,
+		SDL_HAT_DOWN        = 0x04,
+		SDL_HAT_LEFT        = 0x08,
+		SDL_HAT_RIGHTUP     = (SDL_HAT_RIGHT | SDL_HAT_UP),
+		SDL_HAT_RIGHTDOWN   = (SDL_HAT_RIGHT | SDL_HAT_DOWN),
+		SDL_HAT_LEFTUP      = (SDL_HAT_LEFT | SDL_HAT_UP),
+		SDL_HAT_LEFTDOWN    = (SDL_HAT_LEFT | SDL_HAT_DOWN),
+	}
 
-	[CLink] public static extern c_char*  SDL_GetJoystickNameForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern void SDL_LockJoysticks();
 
-	[CLink] public static extern c_char*  SDL_GetJoystickPathForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern void SDL_UnlockJoysticks();
 
-	[CLink] public static extern c_int SDL_GetJoystickPlayerIndexForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_bool SDL_HasJoystick();
 
-	[CLink] public static extern SDL_GUID SDL_GetJoystickGUIDForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_JoystickID*  SDL_GetJoysticks(c_int* count);
 
-	[CLink] public static extern uint16 SDL_GetJoystickVendorForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_char*  SDL_GetJoystickNameForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern uint16 SDL_GetJoystickProductForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_char*  SDL_GetJoystickPathForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern uint16 SDL_GetJoystickProductVersionForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern c_int SDL_GetJoystickPlayerIndexForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_JoystickType SDL_GetJoystickTypeForID(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_GUID SDL_GetJoystickGUIDForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Joystick* SDL_OpenJoystick(SDL_JoystickID instance_id);
+	 [CLink] public static extern uint16 SDL_GetJoystickVendorForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Joystick* SDL_GetJoystickFromID(SDL_JoystickID instance_id);
+	 [CLink] public static extern uint16 SDL_GetJoystickProductForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_Joystick* SDL_GetJoystickFromPlayerIndex(c_int player_index);
+	 [CLink] public static extern uint16 SDL_GetJoystickProductVersionForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern SDL_JoystickID SDL_AttachVirtualJoystick(SDL_VirtualJoystickDesc* desc);
+	 [CLink] public static extern SDL_JoystickType SDL_GetJoystickTypeForID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_bool SDL_DetachVirtualJoystick(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_Joystick* SDL_OpenJoystick(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_bool SDL_IsJoystickVirtual(SDL_JoystickID instance_id);
+	 [CLink] public static extern SDL_Joystick* SDL_GetJoystickFromID(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_bool SDL_SetJoystickVirtualAxis(SDL_Joystick* joystick, c_int axis, int16 value);
+	 [CLink] public static extern SDL_Joystick* SDL_GetJoystickFromPlayerIndex(c_int player_index);
 
-	[CLink] public static extern c_bool SDL_SetJoystickVirtualBall(SDL_Joystick* joystick, c_int ball, int16 xrel, int16 yrel);
+	 [CLink] public static extern SDL_JoystickID SDL_AttachVirtualJoystick(SDL_VirtualJoystickDesc* desc);
 
-	[CLink] public static extern c_bool SDL_SetJoystickVirtualButton(SDL_Joystick* joystick, c_int button, c_bool down);
+	 [CLink] public static extern c_bool SDL_DetachVirtualJoystick(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_bool SDL_SetJoystickVirtualHat(SDL_Joystick* joystick, c_int hat, int8 value);
+	 [CLink] public static extern c_bool SDL_IsJoystickVirtual(SDL_JoystickID instance_id);
 
-	[CLink] public static extern c_bool SDL_SetJoystickVirtualTouchpad(SDL_Joystick* joystick, c_int touchpad, c_int finger, c_bool down, float x, float y, float pressure);
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualAxis(SDL_Joystick* joystick, c_int axis, int16 value);
 
-	[CLink] public static extern c_bool SDL_SendJoystickVirtualSensorData(SDL_Joystick* joystick, SDL_SensorType type, uint64 sensor_timestamp, float* data, c_int num_values);
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualBall(SDL_Joystick* joystick, c_int ball, int16 xrel, int16 yrel);
 
-	[CLink] public static extern SDL_PropertiesID SDL_GetJoystickProperties(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualButton(SDL_Joystick* joystick, c_int button, c_bool down);
 
-	[CLink] public static extern c_char* SDL_GetJoystickName(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualHat(SDL_Joystick* joystick, c_int hat, int8 value);
 
-	[CLink] public static extern c_char*  SDL_GetJoystickPath(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualTouchpad(SDL_Joystick* joystick, c_int touchpad, c_int finger, c_bool down, float x, float y, float pressure);
 
-	[CLink] public static extern c_int SDL_GetJoystickPlayerIndex(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_SendJoystickVirtualSensorData(SDL_Joystick* joystick, SDL_SensorType type, uint64 sensor_timestamp, float* data, c_int num_values);
 
-	[CLink] public static extern c_bool SDL_SetJoystickPlayerIndex(SDL_Joystick* joystick, c_int player_index);
+	 [CLink] public static extern SDL_PropertiesID SDL_GetJoystickProperties(SDL_Joystick* joystick);
 
-	[CLink] public static extern SDL_GUID SDL_GetJoystickGUID(SDL_Joystick* joystick);
+	 [CLink] public static extern c_char* SDL_GetJoystickName(SDL_Joystick* joystick);
 
-	[CLink] public static extern uint16 SDL_GetJoystickVendor(SDL_Joystick* joystick);
+	 [CLink] public static extern c_char*  SDL_GetJoystickPath(SDL_Joystick* joystick);
 
-	[CLink] public static extern uint16 SDL_GetJoystickProduct(SDL_Joystick* joystick);
+	 [CLink] public static extern c_int SDL_GetJoystickPlayerIndex(SDL_Joystick* joystick);
 
-	[CLink] public static extern uint16 SDL_GetJoystickProductVersion(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_SetJoystickPlayerIndex(SDL_Joystick* joystick, c_int player_index);
 
-	[CLink] public static extern uint16 SDL_GetJoystickFirmwareVersion(SDL_Joystick* joystick);
+	 [CLink] public static extern SDL_GUID SDL_GetJoystickGUID(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_char*  SDL_GetJoystickSerial(SDL_Joystick* joystick);
+	 [CLink] public static extern uint16 SDL_GetJoystickVendor(SDL_Joystick* joystick);
 
-	[CLink] public static extern SDL_JoystickType SDL_GetJoystickType(SDL_Joystick* joystick);
+	 [CLink] public static extern uint16 SDL_GetJoystickProduct(SDL_Joystick* joystick);
 
-	[CLink] public static extern void SDL_GetJoystickGUIDInfo(SDL_GUID guid, uint16* vendor, uint16* product, uint16* version, uint16* crc16);
+	 [CLink] public static extern uint16 SDL_GetJoystickProductVersion(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_bool SDL_JoystickConnected(SDL_Joystick* joystick);
+	 [CLink] public static extern uint16 SDL_GetJoystickFirmwareVersion(SDL_Joystick* joystick);
 
-	[CLink] public static extern SDL_JoystickID SDL_GetJoystickID(SDL_Joystick* joystick);
+	 [CLink] public static extern c_char*  SDL_GetJoystickSerial(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_int SDL_GetNumJoystickAxes(SDL_Joystick* joystick);
+	 [CLink] public static extern SDL_JoystickType SDL_GetJoystickType(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_int SDL_GetNumJoystickBalls(SDL_Joystick* joystick);
+	 [CLink] public static extern void SDL_GetJoystickGUIDInfo(SDL_GUID guid, uint16* vendor, uint16* product, uint16* version, uint16* crc16);
 
-	[CLink] public static extern c_int SDL_GetNumJoystickHats(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_JoystickConnected(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_int SDL_GetNumJoystickButtons(SDL_Joystick* joystick);
+	 [CLink] public static extern SDL_JoystickID SDL_GetJoystickID(SDL_Joystick* joystick);
 
-	[CLink] public static extern void SDL_SetJoystickEventsEnabled(c_bool enabled);
+	 [CLink] public static extern c_int SDL_GetNumJoystickAxes(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_bool SDL_JoystickEventsEnabled();
+	 [CLink] public static extern c_int SDL_GetNumJoystickBalls(SDL_Joystick* joystick);
 
-	[CLink] public static extern void SDL_UpdateJoysticks();
+	 [CLink] public static extern c_int SDL_GetNumJoystickHats(SDL_Joystick* joystick);
 
-	[CLink] public static extern int16 SDL_GetJoystickAxis(SDL_Joystick* joystick, c_int axis);
+	 [CLink] public static extern c_int SDL_GetNumJoystickButtons(SDL_Joystick* joystick);
 
-	[CLink] public static extern c_bool SDL_GetJoystickAxisInitialState(SDL_Joystick* joystick, c_int axis, int16* state);
+	 [CLink] public static extern void SDL_SetJoystickEventsEnabled(c_bool enabled);
 
-	[CLink] public static extern c_bool SDL_GetJoystickBall(SDL_Joystick* joystick, c_int ball, c_int* dx, c_int* dy);
+	 [CLink] public static extern c_bool SDL_JoystickEventsEnabled();
 
-	[CLink] public static extern uint8 SDL_GetJoystickHat(SDL_Joystick* joystick, c_int hat);
+	 [CLink] public static extern void SDL_UpdateJoysticks();
 
-	[CLink] public static extern c_bool SDL_GetJoystickButton(SDL_Joystick* joystick, c_int button);
+	 [CLink] public static extern int16 SDL_GetJoystickAxis(SDL_Joystick* joystick, c_int axis);
 
-	[CLink] public static extern c_bool SDL_RumbleJoystick(SDL_Joystick* joystick, uint16 low_frequency_rumble, uint16 high_frequency_rumble, uint32 duration_ms);
+	 [CLink] public static extern c_bool SDL_GetJoystickAxisInitialState(SDL_Joystick* joystick, c_int axis, int16* state);
 
-	[CLink] public static extern c_bool SDL_RumbleJoystickTriggers(SDL_Joystick* joystick, uint16 left_rumble, uint16 right_rumble, uint32 duration_ms);
+	 [CLink] public static extern c_bool SDL_GetJoystickBall(SDL_Joystick* joystick, c_int ball, c_int* dx, c_int* dy);
 
-	[CLink] public static extern c_bool SDL_SetJoystickLED(SDL_Joystick* joystick, uint8 red, uint8 green, uint8 blue);
+	 [CLink] public static extern uint8 SDL_GetJoystickHat(SDL_Joystick* joystick, c_int hat);
 
-	[CLink] public static extern c_bool SDL_SendJoystickEffect(SDL_Joystick* joystick, void* data, c_int size);
+	 [CLink] public static extern c_bool SDL_GetJoystickButton(SDL_Joystick* joystick, c_int button);
 
-	[CLink] public static extern void SDL_CloseJoystick(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_RumbleJoystick(SDL_Joystick* joystick, uint16 low_frequency_rumble, uint16 high_frequency_rumble, uint32 duration_ms);
 
-	[CLink] public static extern SDL_JoystickConnectionState SDL_GetJoystickConnectionState(SDL_Joystick* joystick);
+	 [CLink] public static extern c_bool SDL_RumbleJoystickTriggers(SDL_Joystick* joystick, uint16 left_rumble, uint16 right_rumble, uint32 duration_ms);
 
-	[CLink] public static extern SDL_PowerState SDL_GetJoystickPowerInfo(SDL_Joystick* joystick, c_int* percent);
+	 [CLink] public static extern c_bool SDL_SetJoystickLED(SDL_Joystick* joystick, uint8 red, uint8 green, uint8 blue);
+
+	 [CLink] public static extern c_bool SDL_SendJoystickEffect(SDL_Joystick* joystick, void* data, c_int size);
+
+	 [CLink] public static extern void SDL_CloseJoystick(SDL_Joystick* joystick);
+
+	 [CLink] public static extern SDL_JoystickConnectionState SDL_GetJoystickConnectionState(SDL_Joystick* joystick);
+
+	 [CLink] public static extern SDL_PowerState SDL_GetJoystickPowerInfo(SDL_Joystick* joystick, c_int* percent);
+
+	 [CLink] public static extern c_bool SDL_SetJoystickVirtualHat(SDL_Joystick* joystick, c_int hat, uint8 value);
 
 	//SDL_keyboard.h
 
 	public typealias SDL_KeyboardID = uint32;
 
-	[CLink] public static extern c_bool SDL_HasKeyboard();
 
-	[CLink] public static extern SDL_KeyboardID* SDL_GetKeyboards(c_int* count);
+	public enum SDL_TextInputType : c_int
+	{
+		SDL_TEXTINPUT_TYPE_TEXT, /**< The input is text */
+		SDL_TEXTINPUT_TYPE_TEXT_NAME, /**< The input is a person's name */
+		SDL_TEXTINPUT_TYPE_TEXT_EMAIL, /**< The input is an e-mail address */
+		SDL_TEXTINPUT_TYPE_TEXT_USERNAME, /**< The input is a username */
+		SDL_TEXTINPUT_TYPE_TEXT_PASSWORD_HIDDEN, /**< The input is a secure password that is hidden */
+		SDL_TEXTINPUT_TYPE_TEXT_PASSWORD_VISIBLE, /**< The input is a secure password that is visible */
+		SDL_TEXTINPUT_TYPE_NUMBER, /**< The input is a number */
+		SDL_TEXTINPUT_TYPE_NUMBER_PASSWORD_HIDDEN, /**< The input is a secure PIN that is hidden */
+		SDL_TEXTINPUT_TYPE_NUMBER_PASSWORD_VISIBLE /**< The input is a secure PIN that is visible */
+	}
 
-	[CLink] public static extern c_char* SDL_GetKeyboardNameForID(SDL_KeyboardID instance_id);
+	public enum SDL_Capitalization : c_int
+	{
+		SDL_CAPITALIZE_NONE, /**< No auto-capitalization will be done */
+		SDL_CAPITALIZE_SENTENCES, /**< The first letter of sentences will be capitalized */
+		SDL_CAPITALIZE_WORDS, /**< The first letter of words will be capitalized */
+		SDL_CAPITALIZE_LETTERS /**< All letters will be capitalized */
+	}
 
-	[CLink] public static extern SDL_Window* SDL_GetKeyboardFocus();
 
-	[CLink] public static extern c_bool* SDL_GetKeyboardState(c_int* numkeys);
+	public const c_char* SDL_PROP_TEXTINPUT_TYPE_NUMBER                  = "SDL.textinput.type";
+	public const c_char* SDL_PROP_TEXTINPUT_CAPITALIZATION_NUMBER        = "SDL.textinput.capitalization";
+	public const c_char* SDL_PROP_TEXTINPUT_AUTOCORRECT_BOOLEAN          = "SDL.textinput.autocorrect";
+	public const c_char* SDL_PROP_TEXTINPUT_MULTILINE_BOOLEAN            = "SDL.textinput.multiline";
+	public const c_char* SDL_PROP_TEXTINPUT_ANDROID_INPUTTYPE_NUMBER     = "SDL.textinput.android.inputtype";
 
-	[CLink] public static extern void SDL_ResetKeyboard();
+	 [CLink] public static extern c_bool SDL_HasKeyboard();
 
-	[CLink] public static extern SDL_Keymod SDL_GetModState();
+	 [CLink] public static extern SDL_KeyboardID* SDL_GetKeyboards(c_int* count);
 
-	[CLink] public static extern void SDL_SetModState(SDL_Keymod modstate);
+	 [CLink] public static extern c_char* SDL_GetKeyboardNameForID(SDL_KeyboardID instance_id);
 
-	[CLink] public static extern SDL_Keycode SDL_GetKeyFromScancode(SDL_Scancode scancode, SDL_Keymod modstate, c_bool key_event);
+	 [CLink] public static extern SDL_Window* SDL_GetKeyboardFocus();
 
-	[CLink] public static extern SDL_Scancode SDL_GetScancodeFromKey(SDL_Keycode key, SDL_Keymod* modstate);
+	 [CLink] public static extern c_bool* SDL_GetKeyboardState(c_int* numkeys);
 
-	[CLink] public static extern c_bool SDL_SetScancodeName(SDL_Scancode scancode, c_char* name);
+	 [CLink] public static extern void SDL_ResetKeyboard();
 
-	[CLink] public static extern c_char* SDL_GetScancodeName(SDL_Scancode scancode);
+	 [CLink] public static extern SDL_Keymod SDL_GetModState();
 
-	[CLink] public static extern SDL_Scancode SDL_GetScancodeFromName(c_char* name);
+	 [CLink] public static extern void SDL_SetModState(SDL_Keymod modstate);
 
-	[CLink] public static extern c_char*  SDL_GetKeyName(SDL_Keycode key);
+	 [CLink] public static extern SDL_Keycode SDL_GetKeyFromScancode(SDL_Scancode scancode, SDL_Keymod modstate, c_bool key_event);
 
-	[CLink] public static extern SDL_Keycode SDL_GetKeyFromName(c_char* name);
+	 [CLink] public static extern SDL_Scancode SDL_GetScancodeFromKey(SDL_Keycode key, SDL_Keymod* modstate);
 
-	[CLink] public static extern c_bool SDL_StartTextInput(SDL_Window* window);
+	 [CLink] public static extern c_bool SDL_SetScancodeName(SDL_Scancode scancode, c_char* name);
 
-	[CLink] public static extern c_bool SDL_StartTextInputWithProperties(SDL_Window* window, SDL_PropertiesID props);
+	 [CLink] public static extern c_char* SDL_GetScancodeName(SDL_Scancode scancode);
 
-	[CLink] public static extern c_bool SDL_TextInputActive(SDL_Window* window);
+	 [CLink] public static extern SDL_Scancode SDL_GetScancodeFromName(c_char* name);
 
-	[CLink] public static extern c_bool SDL_StopTextInput(SDL_Window* window);
+	 [CLink] public static extern c_char*  SDL_GetKeyName(SDL_Keycode key);
 
-	[CLink] public static extern c_bool SDL_ClearComposition(SDL_Window* window);
+	 [CLink] public static extern SDL_Keycode SDL_GetKeyFromName(c_char* name);
 
-	[CLink] public static extern c_bool SDL_SetTextInputArea(SDL_Window* window, SDL_Rect* rect, c_int cursor);
+	 [CLink] public static extern c_bool SDL_StartTextInput(SDL_Window* window);
 
-	[CLink] public static extern c_bool SDL_GetTextInputArea(SDL_Window* window, SDL_Rect* rect, int* cursor);
+	 [CLink] public static extern c_bool SDL_StartTextInputWithProperties(SDL_Window* window, SDL_PropertiesID props);
 
-	[CLink] public static extern c_bool SDL_HasScreenKeyboardSupport();
+	 [CLink] public static extern c_bool SDL_TextInputActive(SDL_Window* window);
 
-	[CLink] public static extern c_bool SDL_ScreenKeyboardShown(SDL_Window* window);
+	 [CLink] public static extern c_bool SDL_StopTextInput(SDL_Window* window);
+
+	 [CLink] public static extern c_bool SDL_ClearComposition(SDL_Window* window);
+
+	 [CLink] public static extern c_bool SDL_SetTextInputArea(SDL_Window* window, SDL_Rect* rect, c_int cursor);
+
+	 [CLink] public static extern c_bool SDL_GetTextInputArea(SDL_Window* window, SDL_Rect* rect, int* cursor);
+
+	 [CLink] public static extern c_bool SDL_HasScreenKeyboardSupport();
+
+	 [CLink] public static extern c_bool SDL_ScreenKeyboardShown(SDL_Window* window);
+
+	 [CLink] public static extern c_bool SDL_GetTextInputArea(SDL_Window* window, SDL_Rect* rect, c_int* cursor);
 
 	//SDL_loadso.h
 
@@ -3413,11 +4053,11 @@ static
 
 	public typealias SDL_FunctionPointer = function void();
 
-	[CLink] public static extern SDL_SharedObject* SDL_LoadObject(c_char* sofile);
+	 [CLink] public static extern SDL_SharedObject* SDL_LoadObject(c_char* sofile);
 
-	[CLink] public static extern SDL_FunctionPointer SDL_LoadFunction(SDL_SharedObject* handle, c_char* name);
+	 [CLink] public static extern SDL_FunctionPointer SDL_LoadFunction(SDL_SharedObject* handle, c_char* name);
 
-	[CLink] public static extern void SDL_UnloadObject(SDL_SharedObject* handle);
+	 [CLink] public static extern void SDL_UnloadObject(SDL_SharedObject* handle);
 
 	//SDL_locale.h
 
@@ -3428,7 +4068,7 @@ static
 		public c_char* country; /**< A country, like "US" for America. Can be NULL. */
 	}
 
-	[CLink] public static extern SDL_Locale** SDL_GetPreferredLocales(c_int* count);
+	 [CLink] public static extern SDL_Locale** SDL_GetPreferredLocales(c_int* count);
 
 	//SDL_log.h
 
@@ -3445,43 +4085,70 @@ static
 		SDL_LOG_PRIORITY_COUNT
 	}
 
+	public enum SDL_LogCategory : c_int
+	{
+		SDL_LOG_CATEGORY_APPLICATION,
+		SDL_LOG_CATEGORY_ERROR,
+		SDL_LOG_CATEGORY_ASSERT,
+		SDL_LOG_CATEGORY_SYSTEM,
+		SDL_LOG_CATEGORY_AUDIO,
+		SDL_LOG_CATEGORY_VIDEO,
+		SDL_LOG_CATEGORY_RENDER,
+		SDL_LOG_CATEGORY_INPUT,
+		SDL_LOG_CATEGORY_TEST,
+		SDL_LOG_CATEGORY_GPU,
+
+	/* Reserved for future SDL library use */
+		SDL_LOG_CATEGORY_RESERVED2,
+		SDL_LOG_CATEGORY_RESERVED3,
+		SDL_LOG_CATEGORY_RESERVED4,
+		SDL_LOG_CATEGORY_RESERVED5,
+		SDL_LOG_CATEGORY_RESERVED6,
+		SDL_LOG_CATEGORY_RESERVED7,
+		SDL_LOG_CATEGORY_RESERVED8,
+		SDL_LOG_CATEGORY_RESERVED9,
+		SDL_LOG_CATEGORY_RESERVED10,
+
+		SDL_LOG_CATEGORY_CUSTOM
+	}
+
 	public typealias SDL_LogOutputFunction = function void(void* userdata, c_int category, SDL_LogPriority priority, c_char* message);
 
-	[CLink] public static extern void SDL_SetLogPriorities(SDL_LogPriority priority);
+	 [CLink] public static extern void SDL_SetLogPriorities(SDL_LogPriority priority);
 
-	[CLink] public static extern void SDL_SetLogPriority(c_int category, SDL_LogPriority priority);
+	 [CLink] public static extern void SDL_SetLogPriority(c_int category, SDL_LogPriority priority);
 
-	[CLink] public static extern SDL_LogPriority SDL_GetLogPriority(c_int category);
+	 [CLink] public static extern SDL_LogPriority SDL_GetLogPriority(c_int category);
 
-	[CLink] public static extern void SDL_ResetLogPriorities();
+	 [CLink] public static extern void SDL_ResetLogPriorities();
 
-	[CLink] public static extern c_bool SDL_SetLogPriorityPrefix(SDL_LogPriority priority, c_char* prefix);
+	 [CLink] public static extern c_bool SDL_SetLogPriorityPrefix(SDL_LogPriority priority, c_char* prefix);
 
-	[CLink] public static extern void SDL_Log(c_char* fmt, ...);
+	 [CLink] public static extern void SDL_Log(c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogTrace(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogTrace(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogVerbose(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogVerbose(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogDebug(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogDebug(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogInfo(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogInfo(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogWarn(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogWarn(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogError(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogError(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogCritical(c_int category, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogCritical(c_int category, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogMessage(c_int category, SDL_LogPriority priority, c_char* fmt, ...);
+	 [CLink] public static extern void SDL_LogMessage(c_int category, SDL_LogPriority priority, c_char* fmt, ...);
 
-	[CLink] public static extern void SDL_LogMessageV(c_int category, SDL_LogPriority priority, c_char* fmt, VarArgs ap);
+	 [CLink] public static extern void SDL_LogMessageV(c_int category, SDL_LogPriority priority, c_char* fmt, VarArgs ap);
 
-	[CLink] public static extern SDL_LogOutputFunction SDL_GetDefaultLogOutputFunction();
+	 [CLink] public static extern SDL_LogOutputFunction SDL_GetDefaultLogOutputFunction();
 
-	[CLink] public static extern void SDL_GetLogOutputFunction(SDL_LogOutputFunction* callback, void** userdata);
+	 [CLink] public static extern void SDL_GetLogOutputFunction(SDL_LogOutputFunction* callback, void** userdata);
 
-	[CLink] public static extern void SDL_SetLogOutputFunction(SDL_LogOutputFunction callback, void* userdata);
+	 [CLink] public static extern void SDL_SetLogOutputFunction(SDL_LogOutputFunction callback, void* userdata);
 
 	//SDL_main.h
 
@@ -3502,17 +4169,32 @@ static
 		SDL_APP_FAILURE /**< Value that requests termination with error from the main callbacks. */
 	}
 
-	[CLink] public static extern void SDL_SetMainReady();
+	 [CLink] public static extern void SDL_SetMainReady();
 
-	[CLink] public static extern c_int SDL_RunApp(c_int argc, c_char*[] argv, SDL_main_func mainFunction, void* reserved);
+	 [CLink] public static extern c_int SDL_RunApp(c_int argc, c_char*[] argv, SDL_main_func mainFunction, void* reserved);
 
-	[CLink] public static extern c_int SDL_EnterAppMainCallbacks(c_int argc, c_char*[] argv, SDL_AppInit_func appinit, SDL_AppIterate_func appiter, SDL_AppEvent_func appevent, SDL_AppQuit_func appquit);
+	 [CLink] public static extern c_int SDL_EnterAppMainCallbacks(c_int argc, c_char*[] argv, SDL_AppInit_func appinit, SDL_AppIterate_func appiter, SDL_AppEvent_func appevent, SDL_AppQuit_func appquit);
 
-	[CLink] public static extern c_bool SDL_RegisterApp(c_char* name, uint32 style, void* hInst);
+	 [CLink] public static extern void SDL_GDKSuspendComplete();
 
-	[CLink] public static extern void SDL_UnregisterApp();
+	 [CLink] public static extern SDL_AppResult SDL_AppInit(void** appstate, c_int argc, c_char*[] argv);
 
-	[CLink] public static extern void SDL_GDKSuspendComplete();
+	 [CLink] public static extern SDL_AppResult SDL_AppIterate(void* appstate);
+
+	 [CLink] public static extern SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event);
+
+	 [CLink] public static extern void SDL_AppQuit(void* appstate, SDL_AppResult result);
+
+	 [CLink] public static extern c_int SDL_main(int32 argc, c_char*[] argv);
+
+#if BF_PLATFORM_WINDOWS
+
+	 [CLink] public static extern c_bool SDL_RegisterApp(c_char* name, uint32 style, void* hInst);
+
+	 [CLink] public static extern void SDL_UnregisterApp();
+
+#endif
+
 
 	//SDL_messagebox.h
 
@@ -3577,23 +4259,24 @@ static
 		public uint8 b;
 	}
 
-	[CLink] public static extern c_bool SDL_ShowMessageBox(SDL_MessageBoxData* messageboxdata, c_int* buttonid);
+	 [CLink] public static extern c_bool SDL_ShowMessageBox(SDL_MessageBoxData* messageboxdata, c_int* buttonid);
 
-	[CLink] public static extern c_bool SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags flags, c_char* title, c_char* message, SDL_Window* window);
+	 [CLink] public static extern c_bool SDL_ShowSimpleMessageBox(SDL_MessageBoxFlags flags, c_char* title, c_char* message, SDL_Window* window);
+
 
 	//SDL_metal.h
 
 	public typealias SDL_MetalView = void*;
 
-	[CLink] public static extern SDL_MetalView SDL_Metal_CreateView(SDL_Window* window);
+	 [CLink] public static extern SDL_MetalView SDL_Metal_CreateView(SDL_Window* window);
 
-	[CLink] public static extern void SDL_Metal_DestroyView(SDL_MetalView view);
+	 [CLink] public static extern void SDL_Metal_DestroyView(SDL_MetalView view);
 
-	[CLink] public static extern void* SDL_Metal_GetLayer(SDL_MetalView view);
+	 [CLink] public static extern void* SDL_Metal_GetLayer(SDL_MetalView view);
 
 	//SDL_misc.h
 
-	[CLink] public static extern c_bool SDL_OpenURL(c_char* url);
+	 [CLink] public static extern c_bool SDL_OpenURL(c_char* url);
 
 	//SDL_mouse.h
 
@@ -3650,49 +4333,53 @@ static
 		SDL_MOUSEWHEEL_FLIPPED /**< The scroll direction is flipped / natural */
 	}
 
-	[CLink] public static extern c_bool SDL_HasMouse();
+	 [CLink] public static extern c_bool SDL_HasMouse();
 
-	[CLink] public static extern SDL_MouseID* SDL_GetMice(c_int* count);
+	 [CLink] public static extern SDL_MouseID* SDL_GetMice(c_int* count);
 
-	[CLink] public static extern c_char* SDL_GetMouseNameForID(SDL_MouseID instance_id);
+	 [CLink] public static extern c_char* SDL_GetMouseNameForID(SDL_MouseID instance_id);
 
-	[CLink] public static extern SDL_Window* SDL_GetMouseFocus();
+	 [CLink] public static extern SDL_Window* SDL_GetMouseFocus();
 
-	[CLink] public static extern SDL_MouseButtonFlags SDL_GetMouseState(float* x, float* y);
+	 [CLink] public static extern SDL_MouseButtonFlags SDL_GetMouseState(float* x, float* y);
 
-	[CLink] public static extern SDL_MouseButtonFlags SDL_GetGlobalMouseState(float* x, float* y);
+	 [CLink] public static extern SDL_MouseButtonFlags SDL_GetGlobalMouseState(float* x, float* y);
 
-	[CLink] public static extern SDL_MouseButtonFlags SDL_GetRelativeMouseState(float* x, float* y);
+	 [CLink] public static extern SDL_MouseButtonFlags SDL_GetRelativeMouseState(float* x, float* y);
 
-	[CLink] public static extern void SDL_WarpMouseInWindow(SDL_Window*  window, float x, float y);
+	 [CLink] public static extern void SDL_WarpMouseInWindow(SDL_Window*  window, float x, float y);
 
-	[CLink] public static extern c_bool SDL_WarpMouseGlobal(float x, float y);
+	 [CLink] public static extern c_bool SDL_WarpMouseGlobal(float x, float y);
 
-	[CLink] public static extern c_bool SDL_SetWindowRelativeMouseMode(SDL_Window* window, c_bool enabled);
+	 [CLink] public static extern c_bool SDL_SetWindowRelativeMouseMode(SDL_Window* window, c_bool enabled);
 
-	[CLink] public static extern c_bool SDL_GetWindowRelativeMouseMode(SDL_Window* window);
+	 [CLink] public static extern c_bool SDL_GetWindowRelativeMouseMode(SDL_Window* window);
 
-	[CLink] public static extern c_bool SDL_CaptureMouse(c_bool enabled);
+	 [CLink] public static extern c_bool SDL_CaptureMouse(c_bool enabled);
 
-	[CLink] public static extern SDL_Cursor* SDL_CreateCursor(uint8*  data, c_int hot_x, c_int hot_y);
+	 [CLink] public static extern SDL_Cursor* SDL_CreateCursor(uint8*  data, c_int hot_x, c_int hot_y);
 
-	[CLink] public static extern SDL_Cursor* SDL_CreateColorCursor(SDL_Surface* surface, uint8* mask, c_int w, c_int h, c_int hot_x, c_int hot_y);
+	 [CLink] public static extern SDL_Cursor* SDL_CreateColorCursor(SDL_Surface* surface, uint8* mask, c_int w, c_int h, c_int hot_x, c_int hot_y);
 
-	[CLink] public static extern SDL_Cursor* SDL_CreateSystemCursor(SDL_SystemCursor id);
+	 [CLink] public static extern SDL_Cursor* SDL_CreateSystemCursor(SDL_SystemCursor id);
 
-	[CLink] public static extern c_bool SDL_SetCursor(SDL_Cursor* cursor);
+	 [CLink] public static extern c_bool SDL_SetCursor(SDL_Cursor* cursor);
 
-	[CLink] public static extern SDL_Cursor* SDL_GetCursor();
+	 [CLink] public static extern SDL_Cursor* SDL_GetCursor();
 
-	[CLink] public static extern SDL_Cursor* SDL_GetDefaultCursor();
+	 [CLink] public static extern SDL_Cursor* SDL_GetDefaultCursor();
 
-	[CLink] public static extern void SDL_DestroyCursor(SDL_Cursor* cursor);
+	 [CLink] public static extern void SDL_DestroyCursor(SDL_Cursor* cursor);
 
-	[CLink] public static extern c_bool SDL_ShowCursor();
+	 [CLink] public static extern c_bool SDL_ShowCursor();
 
-	[CLink] public static extern c_bool SDL_HideCursor();
+	 [CLink] public static extern c_bool SDL_HideCursor();
 
-	[CLink] public static extern c_bool SDL_CursorVisible();
+	 [CLink] public static extern c_bool SDL_CursorVisible();
+
+	 [CLink] public static extern SDL_Cursor* SDL_CreateCursor(uint8* data, uint8* mask, c_int w, c_int h, c_int hot_x, c_int hot_y);
+
+	 [CLink] public static extern SDL_Cursor* SDL_CreateColorCursor(SDL_Surface* surface, c_int hot_x, c_int hot_y);
 
 	//SDL_mutex.h
 
@@ -3716,61 +4403,69 @@ static
 		public void* reserved;
 	}
 
-	[CLink] public static extern SDL_Mutex* SDL_CreateMutex();
+	public enum SDL_InitStatus : c_int
+	{
+		SDL_INIT_STATUS_UNINITIALIZED,
+		SDL_INIT_STATUS_INITIALIZING,
+		SDL_INIT_STATUS_INITIALIZED,
+		SDL_INIT_STATUS_UNINITIALIZING
+	}
 
-	[CLink] public static extern void SDL_LockMutex(SDL_Mutex* mutex);
+	 [CLink] public static extern SDL_Mutex* SDL_CreateMutex();
 
-	[CLink] public static extern c_bool SDL_TryLockMutex(SDL_Mutex* mutex);
+	 [CLink] public static extern void SDL_LockMutex(SDL_Mutex* mutex);
 
-	[CLink] public static extern void SDL_UnlockMutex(SDL_Mutex* mutex);
+	 [CLink] public static extern c_bool SDL_TryLockMutex(SDL_Mutex* mutex);
 
-	[CLink] public static extern void SDL_DestroyMutex(SDL_Mutex* mutex);
+	 [CLink] public static extern void SDL_UnlockMutex(SDL_Mutex* mutex);
 
-	[CLink] public static extern SDL_RWLock* SDL_CreateRWLock();
+	 [CLink] public static extern void SDL_DestroyMutex(SDL_Mutex* mutex);
 
-	[CLink] public static extern void SDL_LockRWLockForReading(SDL_RWLock* rwlock);
+	 [CLink] public static extern SDL_RWLock* SDL_CreateRWLock();
 
-	[CLink] public static extern void SDL_LockRWLockForWriting(SDL_RWLock* rwlock);
+	 [CLink] public static extern void SDL_LockRWLockForReading(SDL_RWLock* rwlock);
 
-	[CLink] public static extern c_bool SDL_TryLockRWLockForReading(SDL_RWLock* rwlock);
+	 [CLink] public static extern void SDL_LockRWLockForWriting(SDL_RWLock* rwlock);
 
-	[CLink] public static extern c_bool SDL_TryLockRWLockForWriting(SDL_RWLock* rwlock);
+	 [CLink] public static extern c_bool SDL_TryLockRWLockForReading(SDL_RWLock* rwlock);
 
-	[CLink] public static extern void SDL_UnlockRWLock(SDL_RWLock* rwlock);
+	 [CLink] public static extern c_bool SDL_TryLockRWLockForWriting(SDL_RWLock* rwlock);
 
-	[CLink] public static extern void SDL_DestroyRWLock(SDL_RWLock* rwlock);
+	 [CLink] public static extern void SDL_UnlockRWLock(SDL_RWLock* rwlock);
 
-	[CLink] public static extern SDL_Semaphore* SDL_CreateSemaphore(uint32 initial_value);
+	 [CLink] public static extern void SDL_DestroyRWLock(SDL_RWLock* rwlock);
 
-	[CLink] public static extern void SDL_DestroySemaphore(SDL_Semaphore* sem);
+	 [CLink] public static extern SDL_Semaphore* SDL_CreateSemaphore(uint32 initial_value);
 
-	[CLink] public static extern void SDL_WaitSemaphore(SDL_Semaphore* sem);
+	 [CLink] public static extern void SDL_DestroySemaphore(SDL_Semaphore* sem);
 
-	[CLink] public static extern c_bool SDL_TryWaitSemaphore(SDL_Semaphore* sem);
+	 [CLink] public static extern void SDL_WaitSemaphore(SDL_Semaphore* sem);
 
-	[CLink] public static extern c_bool SDL_WaitSemaphoreTimeout(SDL_Semaphore* sem, int32 timeoutMS);
+	 [CLink] public static extern c_bool SDL_TryWaitSemaphore(SDL_Semaphore* sem);
 
-	[CLink] public static extern void SDL_SignalSemaphore(SDL_Semaphore* sem);
+	 [CLink] public static extern c_bool SDL_WaitSemaphoreTimeout(SDL_Semaphore* sem, c_int timeoutMS);
 
-	[CLink] public static extern uint32 SDL_GetSemaphoreValue(SDL_Semaphore* sem);
+	 [CLink] public static extern void SDL_SignalSemaphore(SDL_Semaphore* sem);
 
-	[CLink] public static extern SDL_Condition* SDL_CreateCondition();
+	 [CLink] public static extern uint32 SDL_GetSemaphoreValue(SDL_Semaphore* sem);
 
-	[CLink] public static extern void SDL_DestroyCondition(SDL_Condition* cond);
+	 [CLink] public static extern SDL_Condition* SDL_CreateCondition();
 
-	[CLink] public static extern void SDL_SignalCondition(SDL_Condition* cond);
+	 [CLink] public static extern void SDL_DestroyCondition(SDL_Condition* cond);
 
-	[CLink] public static extern void SDL_BroadcastCondition(SDL_Condition* cond);
+	 [CLink] public static extern void SDL_SignalCondition(SDL_Condition* cond);
 
-	[CLink] public static extern void SDL_WaitCondition(SDL_Condition* cond, SDL_Mutex* mutex);
+	 [CLink] public static extern void SDL_BroadcastCondition(SDL_Condition* cond);
 
-	[CLink] public static extern c_bool SDL_WaitConditionTimeout(SDL_Condition* cond, SDL_Mutex* mutex, int32 timeoutMS);
+	 [CLink] public static extern void SDL_WaitCondition(SDL_Condition* cond, SDL_Mutex* mutex);
 
-	[CLink] public static extern c_bool SDL_ShouldInit(SDL_InitState* state);
+	 [CLink] public static extern c_bool SDL_WaitConditionTimeout(SDL_Condition* cond, SDL_Mutex* mutex, c_int timeoutMS);
 
-	[CLink] public static extern c_bool SDL_ShouldQuit(SDL_InitState* state);
+	 [CLink] public static extern c_bool SDL_ShouldInit(SDL_InitState* state);
 
-	[CLink] public static extern void SDL_SetInitialized(SDL_InitState* state, c_bool initialized);
+	 [CLink] public static extern c_bool SDL_ShouldQuit(SDL_InitState* state);
+
+	 [CLink] public static extern void SDL_SetInitialized(SDL_InitState* state, c_bool initialized);
 
 	//SDL_pixels.h
 
@@ -4068,33 +4763,348 @@ static
 		SDL_COLORSPACE_YUV_DEFAULT = SDL_COLORSPACE_JPEG /**< The default colorspace for YUV surfaces if no colorspace is specified */
 	}
 
-	[CLink] public static extern c_char*  SDL_GetPixelFormatName(SDL_PixelFormat format);
+	public const uint8 SDL_ALPHA_OPAQUE = 255;
+	public const float SDL_ALPHA_OPAQUE_FLOAT = 1.0f;
+	public const uint8 SDL_ALPHA_TRANSPARENT = 0;
+	public const float SDL_ALPHA_TRANSPARENT_FLOAT = 0.0f;
 
-	[CLink] public static extern c_bool SDL_GetMasksForPixelFormat(SDL_PixelFormat format, c_int* bpp, uint32* Rmask, uint32* Gmask, uint32* Bmask, uint32* Amask);
+	public enum SDL_PixelType : c_int
+	{
+		SDL_PIXELTYPE_UNKNOWN,
+		SDL_PIXELTYPE_INDEX1,
+		SDL_PIXELTYPE_INDEX4,
+		SDL_PIXELTYPE_INDEX8,
+		SDL_PIXELTYPE_PACKED8,
+		SDL_PIXELTYPE_PACKED16,
+		SDL_PIXELTYPE_PACKED32,
+		SDL_PIXELTYPE_ARRAYU8,
+		SDL_PIXELTYPE_ARRAYU16,
+		SDL_PIXELTYPE_ARRAYU32,
+		SDL_PIXELTYPE_ARRAYF16,
+		SDL_PIXELTYPE_ARRAYF32,
+	/* appended at the end for compatibility with sdl2-compat:  */
+		SDL_PIXELTYPE_INDEX2
+	}
 
-	[CLink] public static extern SDL_PixelFormat SDL_GetPixelFormatForMasks(c_int bpp, uint32 Rmask, uint32 Gmask, uint32 Bmask, uint32 Amask);
+	public enum SDL_BitmapOrder : c_int
+	{
+		SDL_BITMAPORDER_NONE,
+		SDL_BITMAPORDER_4321,
+		SDL_BITMAPORDER_1234
+	}
 
-	[CLink] public static extern SDL_PixelFormatDetails* SDL_GetPixelFormatDetails(SDL_PixelFormat format);
+	public enum SDL_PackedOrder : c_int
+	{
+		SDL_PACKEDORDER_NONE,
+		SDL_PACKEDORDER_XRGB,
+		SDL_PACKEDORDER_RGBX,
+		SDL_PACKEDORDER_ARGB,
+		SDL_PACKEDORDER_RGBA,
+		SDL_PACKEDORDER_XBGR,
+		SDL_PACKEDORDER_BGRX,
+		SDL_PACKEDORDER_ABGR,
+		SDL_PACKEDORDER_BGRA
+	}
 
-	[CLink] public static extern SDL_Palette* SDL_CreatePalette(c_int ncolors);
+	public enum SDL_ArrayOrder : c_int
+	{
+		SDL_ARRAYORDER_NONE,
+		SDL_ARRAYORDER_RGB,
+		SDL_ARRAYORDER_RGBA,
+		SDL_ARRAYORDER_ARGB,
+		SDL_ARRAYORDER_BGR,
+		SDL_ARRAYORDER_BGRA,
+		SDL_ARRAYORDER_ABGR
+	}
 
-	[CLink] public static extern c_bool SDL_SetPaletteColors(SDL_Palette* palette, SDL_Color* colors, c_int firstcolor, c_int ncolors);
+	public enum SDL_PackedLayout : c_int
+	{
+		SDL_PACKEDLAYOUT_NONE,
+		SDL_PACKEDLAYOUT_332,
+		SDL_PACKEDLAYOUT_4444,
+		SDL_PACKEDLAYOUT_1555,
+		SDL_PACKEDLAYOUT_5551,
+		SDL_PACKEDLAYOUT_565,
+		SDL_PACKEDLAYOUT_8888,
+		SDL_PACKEDLAYOUT_2101010,
+		SDL_PACKEDLAYOUT_1010102
+	}
 
-	[CLink] public static extern void SDL_DestroyPalette(SDL_Palette* palette);
+	public static SDL_PixelFormat SDL_DEFINE_PIXELFOURCC(c_char A, c_char B, c_char C, c_char D) => (SDL_PixelFormat)SDL_FOURCC(A, B, C, D);
 
-	[CLink] public static extern uint32 SDL_MapRGB(SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8 r, uint8 g, uint8 b);
+	public static SDL_PixelFormat SDL_DEFINE_PIXELFORMAT(SDL_PixelType type, c_int order, SDL_PackedLayout layout, uint32 bits, uint32 bytes)
+	{
+		return (SDL_PixelFormat)((1 << 28) | (((int32)type) << 24) | ((order) << 20) | (((int32)layout) << 16) | ((bits) << 8) | ((bytes) << 0));
+	}
 
-	[CLink] public static extern uint32 SDL_MapRGBA(SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8 r, uint8 g, uint8 b, uint8 a);
+	public static c_int SDL_PIXELFLAG(SDL_PixelFormat format)
+	{
+		return ((((int32)format) >> 28) & 0x0F);
+	}
 
-	[CLink] public static extern void SDL_GetRGB(uint32 pixel, SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8* r, uint8* g, uint8* b);
+	public static SDL_PixelType SDL_PIXELTYPE(SDL_PixelFormat format)
+	{
+		return (SDL_PixelType)((((int32)format) >> 24) & 0x0F);
+	}
 
-	[CLink] public static extern void SDL_GetRGBA(uint32 pixel, SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8* r, uint8* g, uint8* b, uint8* a);
+	public static c_int SDL_PIXELORDER(SDL_PixelFormat format)
+	{
+		return ((((int32)format) >> 20) & 0x0F);
+	}
+
+	public static SDL_PackedLayout SDL_PIXELLAYOUT(SDL_PixelFormat format)
+	{
+		return (SDL_PackedLayout)((((int32)format) >> 16) & 0x0F);
+	}
+
+	public static c_int SDL_BITSPERPIXEL(SDL_PixelFormat format)
+	{
+		return (SDL_ISPIXELFORMAT_FOURCC(format) ? 0 : ((((int32)format) >> 8) & 0xFF));
+	}
+
+	public static uint32  SDL_BYTESPERPIXEL(SDL_PixelFormat format)
+	{
+		return (SDL_ISPIXELFORMAT_FOURCC(format) ?
+			((((format) == .SDL_PIXELFORMAT_YUY2) ||
+			((format) == .SDL_PIXELFORMAT_UYVY) ||
+			((format) == .SDL_PIXELFORMAT_YVYU) ||
+			((format) == .SDL_PIXELFORMAT_P010)) ? 2 : 1) : (uint32)((((int32)format) >> 0) & 0xFF));
+	}
+
+
+	public static c_bool SDL_ISPIXELFORMAT_INDEXED(SDL_PixelFormat format)
+	{
+		return (!SDL_ISPIXELFORMAT_FOURCC(format) &&
+			((SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_INDEX1) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_INDEX2) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_INDEX4) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_INDEX8)));
+	}
+
+	public static c_bool SDL_ISPIXELFORMAT_PACKED(SDL_PixelFormat format)
+	{
+		return (!SDL_ISPIXELFORMAT_FOURCC(format) &&
+			((SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_PACKED8) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_PACKED16) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_PACKED32)));
+	}
+
+	public static c_bool SDL_ISPIXELFORMAT_ARRAY(SDL_PixelFormat format)
+	{
+		return (!SDL_ISPIXELFORMAT_FOURCC(format) &&
+			((SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYU8) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYU16) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYU32) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYF16) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYF32)));
+	}
+
+	public static c_bool SDL_ISPIXELFORMAT_10BIT(SDL_PixelFormat format)
+	{
+		return (!SDL_ISPIXELFORMAT_FOURCC(format) &&
+			((SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_PACKED32) &&
+			(SDL_PIXELLAYOUT(format) == .SDL_PACKEDLAYOUT_2101010)));
+	}
+
+	public static c_bool SDL_ISPIXELFORMAT_FLOAT(SDL_PixelFormat format)
+	{
+		return (!SDL_ISPIXELFORMAT_FOURCC(format) &&
+			((SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYF16) ||
+			(SDL_PIXELTYPE(format) == .SDL_PIXELTYPE_ARRAYF32)));
+	}
+
+	public static c_bool SDL_ISPIXELFORMAT_ALPHA(SDL_PixelFormat format)
+	{
+		return ((SDL_ISPIXELFORMAT_PACKED(format) &&
+			((SDL_PIXELORDER(format) == (int32)SDL_PackedOrder.SDL_PACKEDORDER_ARGB) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_PackedOrder.SDL_PACKEDORDER_RGBA) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_PackedOrder.SDL_PACKEDORDER_ABGR) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_PackedOrder.SDL_PACKEDORDER_BGRA))) ||
+			(SDL_ISPIXELFORMAT_ARRAY(format) &&
+			((SDL_PIXELORDER(format) == (int32)SDL_ArrayOrder.SDL_ARRAYORDER_ARGB) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_ArrayOrder.SDL_ARRAYORDER_RGBA) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_ArrayOrder.SDL_ARRAYORDER_ABGR) ||
+			(SDL_PIXELORDER(format) == (int32)SDL_ArrayOrder.SDL_ARRAYORDER_BGRA))));
+	}
+
+
+	public static c_bool SDL_ISPIXELFORMAT_FOURCC(SDL_PixelFormat format)
+	{ /* The flag is set to 1 because 0x1? is not in the printable ASCII range */
+		return ((format != .SDL_PIXELFORMAT_UNKNOWN) && (SDL_PIXELFLAG(format) != 1));
+	}
+
+
+	public enum SDL_ColorType : c_int
+	{
+		SDL_COLOR_TYPE_UNKNOWN = 0,
+		SDL_COLOR_TYPE_RGB = 1,
+		SDL_COLOR_TYPE_YCBCR = 2
+	}
+
+	public enum SDL_ColorRange : c_int
+	{
+		SDL_COLOR_RANGE_UNKNOWN = 0,
+		SDL_COLOR_RANGE_LIMITED = 1, /**< Narrow range, e.g. 16-235 for 8-bit RGB and luma, and 16-240 for 8-bit chroma */
+		SDL_COLOR_RANGE_FULL = 2 /**< Full range, e.g. 0-255 for 8-bit RGB and luma, and 1-255 for 8-bit chroma */
+	}
+
+	public enum SDL_ColorPrimaries : c_int
+	{
+		SDL_COLOR_PRIMARIES_UNKNOWN = 0,
+		SDL_COLOR_PRIMARIES_BT709 = 1, /**< ITU-R BT.709-6 */
+		SDL_COLOR_PRIMARIES_UNSPECIFIED = 2,
+		SDL_COLOR_PRIMARIES_BT470M = 4, /**< ITU-R BT.470-6 System M */
+		SDL_COLOR_PRIMARIES_BT470BG = 5, /**< ITU-R BT.470-6 System B, G / ITU-R BT.601-7 625 */
+		SDL_COLOR_PRIMARIES_BT601 = 6, /**< ITU-R BT.601-7 525, SMPTE 170M */
+		SDL_COLOR_PRIMARIES_SMPTE240 = 7, /**< SMPTE 240M, functionally the same as SDL_COLOR_PRIMARIES_BT601 */
+		SDL_COLOR_PRIMARIES_GENERIC_FILM = 8, /**< Generic film (color filters using Illuminant C) */
+		SDL_COLOR_PRIMARIES_BT2020 = 9, /**< ITU-R BT.2020-2 / ITU-R BT.2100-0 */
+		SDL_COLOR_PRIMARIES_XYZ = 10, /**< SMPTE ST 428-1 */
+		SDL_COLOR_PRIMARIES_SMPTE431 = 11, /**< SMPTE RP 431-2 */
+		SDL_COLOR_PRIMARIES_SMPTE432 = 12, /**< SMPTE EG 432-1 / DCI P3 */
+		SDL_COLOR_PRIMARIES_EBU3213 = 22, /**< EBU Tech. 3213-E */
+		SDL_COLOR_PRIMARIES_CUSTOM = 31
+	}
+
+	public enum SDL_TransferCharacteristics : c_int
+	{
+		SDL_TRANSFER_CHARACTERISTICS_UNKNOWN = 0,
+		SDL_TRANSFER_CHARACTERISTICS_BT709 = 1, /**< Rec. ITU-R BT.709-6 / ITU-R BT1361 */
+		SDL_TRANSFER_CHARACTERISTICS_UNSPECIFIED = 2,
+		SDL_TRANSFER_CHARACTERISTICS_GAMMA22 = 4, /**< ITU-R BT.470-6 System M / ITU-R BT1700 625 PAL & SECAM */
+		SDL_TRANSFER_CHARACTERISTICS_GAMMA28 = 5, /**< ITU-R BT.470-6 System B, G */
+		SDL_TRANSFER_CHARACTERISTICS_BT601 = 6, /**< SMPTE ST 170M / ITU-R BT.601-7 525 or 625 */
+		SDL_TRANSFER_CHARACTERISTICS_SMPTE240 = 7, /**< SMPTE ST 240M */
+		SDL_TRANSFER_CHARACTERISTICS_LINEAR = 8,
+		SDL_TRANSFER_CHARACTERISTICS_LOG100 = 9,
+		SDL_TRANSFER_CHARACTERISTICS_LOG100_SQRT10 = 10,
+		SDL_TRANSFER_CHARACTERISTICS_IEC61966 = 11, /**< IEC 61966-2-4 */
+		SDL_TRANSFER_CHARACTERISTICS_BT1361 = 12, /**< ITU-R BT1361 Extended Colour Gamut */
+		SDL_TRANSFER_CHARACTERISTICS_SRGB = 13, /**< IEC 61966-2-1 (sRGB or sYCC) */
+		SDL_TRANSFER_CHARACTERISTICS_BT2020_10BIT = 14, /**< ITU-R BT2020 for 10-bit system */
+		SDL_TRANSFER_CHARACTERISTICS_BT2020_12BIT = 15, /**< ITU-R BT2020 for 12-bit system */
+		SDL_TRANSFER_CHARACTERISTICS_PQ = 16, /**< SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems */
+		SDL_TRANSFER_CHARACTERISTICS_SMPTE428 = 17, /**< SMPTE ST 428-1 */
+		SDL_TRANSFER_CHARACTERISTICS_HLG = 18, /**< ARIB STD-B67, known as "hybrid log-gamma" (HLG) */
+		SDL_TRANSFER_CHARACTERISTICS_CUSTOM = 31
+	}
+
+	public enum SDL_MatrixCoefficients : c_int
+	{
+		SDL_MATRIX_COEFFICIENTS_IDENTITY = 0,
+		SDL_MATRIX_COEFFICIENTS_BT709 = 1, /**< ITU-R BT.709-6 */
+		SDL_MATRIX_COEFFICIENTS_UNSPECIFIED = 2,
+		SDL_MATRIX_COEFFICIENTS_FCC = 4, /**< US FCC Title 47 */
+		SDL_MATRIX_COEFFICIENTS_BT470BG = 5, /**< ITU-R BT.470-6 System B, G / ITU-R BT.601-7 625, functionally the same as SDL_MATRIX_COEFFICIENTS_BT601 */
+		SDL_MATRIX_COEFFICIENTS_BT601 = 6, /**< ITU-R BT.601-7 525 */
+		SDL_MATRIX_COEFFICIENTS_SMPTE240 = 7, /**< SMPTE 240M */
+		SDL_MATRIX_COEFFICIENTS_YCGCO = 8,
+		SDL_MATRIX_COEFFICIENTS_BT2020_NCL = 9, /**< ITU-R BT.2020-2 non-constant luminance */
+		SDL_MATRIX_COEFFICIENTS_BT2020_CL = 10, /**< ITU-R BT.2020-2 constant luminance */
+		SDL_MATRIX_COEFFICIENTS_SMPTE2085 = 11, /**< SMPTE ST 2085 */
+		SDL_MATRIX_COEFFICIENTS_CHROMA_DERIVED_NCL = 12,
+		SDL_MATRIX_COEFFICIENTS_CHROMA_DERIVED_CL = 13,
+		SDL_MATRIX_COEFFICIENTS_ICTCP = 14, /**< ITU-R BT.2100-0 ICTCP */
+		SDL_MATRIX_COEFFICIENTS_CUSTOM = 31
+	}
+
+	public enum SDL_ChromaLocation : c_int
+	{
+		SDL_CHROMA_LOCATION_NONE = 0, /**< RGB, no chroma sampling */
+		SDL_CHROMA_LOCATION_LEFT = 1, /**< In MPEG-2, MPEG-4, and AVC, Cb and Cr are taken on midpoint of the left-edge of the 2x2 square. In other words, they have the same horizontal location as the top-left pixel, but is shifted one-half pixel down vertically. */
+		SDL_CHROMA_LOCATION_CENTER = 2, /**< In JPEG/JFIF, H.261, and MPEG-1, Cb and Cr are taken at the center of the 2x2 square. In other words, they are offset one-half pixel to the right and one-half pixel down compared to the top-left pixel. */
+		SDL_CHROMA_LOCATION_TOPLEFT = 3 /**< In HEVC for BT.2020 and BT.2100 content (in particular on Blu-rays), Cb and Cr are sampled at the same location as the group's top-left Y pixel ("co-sited", "co-located"). */
+	}
+
+
+	public static SDL_Colorspace SDL_DEFINE_COLORSPACE(SDL_ColorType type, SDL_ColorRange range, SDL_ColorPrimaries primaries, SDL_TransferCharacteristics transfer, SDL_MatrixCoefficients matrix, SDL_ChromaLocation chroma)
+	{
+		return
+			(SDL_Colorspace)(((uint32)((int32)type) << 28) | ((uint32)(range) << 24) | ((uint32)(chroma) << 20) | ((uint32)(primaries) << 10) | ((uint32)(transfer) << 5) | ((uint32)(matrix) << 0));
+	}
+
+	public static SDL_ColorType SDL_COLORSPACETYPE(SDL_ColorType cspace)
+	{
+		return (SDL_ColorType)((((int32)cspace) >> 28) & 0x0F);
+	}
+
+	public static SDL_ColorRange SDL_COLORSPACERANGE(SDL_Colorspace cspace)
+	{
+		return (SDL_ColorRange)((((int32)cspace) >> 24) & 0x0F);
+	}
+
+	public static SDL_ChromaLocation SDL_COLORSPACECHROMA(SDL_Colorspace cspace)
+	{
+		return (SDL_ChromaLocation)((((int32)cspace) >> 20) & 0x0F);
+	}
+
+	public static SDL_ColorPrimaries SDL_COLORSPACEPRIMARIES(SDL_Colorspace cspace)
+	{
+		return (SDL_ColorPrimaries)((((int32)cspace) >> 10) & 0x1F);
+	}
+
+	public static SDL_TransferCharacteristics SDL_COLORSPACETRANSFER(SDL_Colorspace cspace)
+	{
+		return (SDL_TransferCharacteristics)((((int32)cspace) >> 5) & 0x1F);
+	}
+
+	public static SDL_MatrixCoefficients SDL_COLORSPACEMATRIX(SDL_Colorspace cspace)
+	{
+		return (SDL_MatrixCoefficients)(((int32)cspace) & 0x1F);
+	}
+
+	public static c_bool SDL_ISCOLORSPACE_MATRIX_BT601(SDL_Colorspace cspace)
+	{
+		return (SDL_COLORSPACEMATRIX(cspace) == .SDL_MATRIX_COEFFICIENTS_BT601 || SDL_COLORSPACEMATRIX(cspace) == .SDL_MATRIX_COEFFICIENTS_BT470BG);
+	}
+
+	public static c_bool SDL_ISCOLORSPACE_MATRIX_BT709(SDL_Colorspace cspace)
+	{
+		return (SDL_COLORSPACEMATRIX(cspace) == .SDL_MATRIX_COEFFICIENTS_BT709);
+	}
+
+	public static c_bool SDL_ISCOLORSPACE_MATRIX_BT2020_NCL(SDL_Colorspace cspace)
+	{
+		return (SDL_COLORSPACEMATRIX(cspace) == .SDL_MATRIX_COEFFICIENTS_BT2020_NCL);
+	}
+
+	public static c_bool SDL_ISCOLORSPACE_LIMITED_RANGE(SDL_Colorspace cspace)
+	{
+		return (SDL_COLORSPACERANGE(cspace) != .SDL_COLOR_RANGE_FULL);
+	}
+
+	public static c_bool SDL_ISCOLORSPACE_FULL_RANGE(SDL_Colorspace cspace)
+	{
+		return (SDL_COLORSPACERANGE(cspace) == .SDL_COLOR_RANGE_FULL);
+	}
+
+	 [CLink] public static extern c_char*  SDL_GetPixelFormatName(SDL_PixelFormat format);
+
+	 [CLink] public static extern c_bool SDL_GetMasksForPixelFormat(SDL_PixelFormat format, c_int* bpp, uint32* Rmask, uint32* Gmask, uint32* Bmask, uint32* Amask);
+
+	 [CLink] public static extern SDL_PixelFormat SDL_GetPixelFormatForMasks(c_int bpp, uint32 Rmask, uint32 Gmask, uint32 Bmask, uint32 Amask);
+
+	 [CLink] public static extern SDL_PixelFormatDetails* SDL_GetPixelFormatDetails(SDL_PixelFormat format);
+
+	 [CLink] public static extern SDL_Palette* SDL_CreatePalette(c_int ncolors);
+
+	 [CLink] public static extern c_bool SDL_SetPaletteColors(SDL_Palette* palette, SDL_Color* colors, c_int firstcolor, c_int ncolors);
+
+	 [CLink] public static extern void SDL_DestroyPalette(SDL_Palette* palette);
+
+	 [CLink] public static extern uint32 SDL_MapRGB(SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8 r, uint8 g, uint8 b);
+
+	 [CLink] public static extern uint32 SDL_MapRGBA(SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8 r, uint8 g, uint8 b, uint8 a);
+
+	 [CLink] public static extern void SDL_GetRGB(uint32 pixel, SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8* r, uint8* g, uint8* b);
+
+	 [CLink] public static extern void SDL_GetRGBA(uint32 pixel, SDL_PixelFormatDetails* format, SDL_Palette* palette, uint8* r, uint8* g, uint8* b, uint8* a);
 
 	//SDL_platform.h
 
 	[CLink] public static extern c_char* SDL_GetPlatform();
 
-	//SDL_power.h
+		//SDL_power.h
 
 	public enum SDL_PowerState : c_int
 	{
@@ -4108,9 +5118,17 @@ static
 
 	[CLink] public static extern SDL_PowerState SDL_GetPowerInfo(c_int* seconds, c_int* percent);
 
-	//SDL_process.h
+		 //SDL_process.h
 
 	public struct SDL_Process;
+
+	public enum SDL_ProcessIO : c_int
+	{
+		SDL_PROCESS_STDIO_INHERITED, /**< The I/O stream is inherited from the application. */
+		SDL_PROCESS_STDIO_NULL, /**< The I/O stream is ignored. */
+		SDL_PROCESS_STDIO_APP, /**< The I/O stream is connected to a new SDL_IOStream that the application can read or write */
+		SDL_PROCESS_STDIO_REDIRECT /**< The I/O stream is redirected to an existing SDL_IOStream. */
+	}
 
 	[CLink] public static extern SDL_Process* SDL_CreateProcess(c_char** args, c_bool pipe_stdio);
 
@@ -4129,6 +5147,22 @@ static
 	[CLink] public static extern c_bool SDL_WaitProcess(SDL_Process* process, c_bool block, c_int* exitcode);
 
 	[CLink] public static extern void SDL_DestroyProcess(SDL_Process* process);
+
+	public const c_char* SDL_PROP_PROCESS_CREATE_ARGS_POINTER                = "SDL.process.create.args";
+	public const c_char* SDL_PROP_PROCESS_CREATE_ENVIRONMENT_POINTER         = "SDL.process.create.environment";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDIN_NUMBER                = "SDL.process.create.stdin_option";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDIN_POINTER               = "SDL.process.create.stdin_source";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDOUT_NUMBER               = "SDL.process.create.stdout_option";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDOUT_POINTER              = "SDL.process.create.stdout_source";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDERR_NUMBER               = "SDL.process.create.stderr_option";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDERR_POINTER              = "SDL.process.create.stderr_source";
+	public const c_char* SDL_PROP_PROCESS_CREATE_STDERR_TO_STDOUT_BOOLEAN    = "SDL.process.create.stderr_to_stdout";
+	public const c_char* SDL_PROP_PROCESS_CREATE_BACKGROUND_BOOLEAN          = "SDL.process.create.background";
+	public const c_char* SDL_PROP_PROCESS_PID_NUMBER         = "SDL.process.pid";
+	public const c_char* SDL_PROP_PROCESS_STDIN_POINTER      = "SDL.process.stdin";
+	public const c_char* SDL_PROP_PROCESS_STDOUT_POINTER     = "SDL.process.stdout";
+	public const c_char* SDL_PROP_PROCESS_STDERR_POINTER     = "SDL.process.stderr";
+	public const c_char* SDL_PROP_PROCESS_BACKGROUND_BOOLEAN = "SDL.process.background";
 
 	//SDL_properties.h
 
@@ -4182,7 +5216,7 @@ static
 
 	[CLink] public static extern float SDL_GetFloatProperty(SDL_PropertiesID props, c_char* name, float default_value);
 
-	[CLink] public static extern c_bool SDL_GetBooleanProperty(SDL_PropertiesID props, c_char* name, bool default_value);
+	[CLink] public static extern c_bool SDL_GetBooleanProperty(SDL_PropertiesID props, c_char* name, c_bool default_value);
 
 	[CLink] public static extern c_bool SDL_ClearProperty(SDL_PropertiesID props, c_char* name);
 
@@ -4224,6 +5258,57 @@ static
 		public c_int y;
 	}
 
+	[Inline] public static void SDL_RectToFRect(SDL_Rect* rect, SDL_FRect* frect)
+	{
+		frect.x = (float)rect.x;
+		frect.y = (float)rect.y;
+		frect.w = (float)rect.w;
+		frect.h = (float)rect.h;
+	}
+
+	[Inline] public static c_bool SDL_PointInRect(SDL_Point* p, SDL_Rect* r)
+	{
+		return (p != null && r != null && (p.x >= r.x) && (p.x < (r.x + r.w)) &&
+			(p.y >= r.y) && (p.y < (r.y + r.h))) ? true : false;
+	}
+
+	[Inline] public static c_bool SDL_RectEmpty(SDL_Rect* r)
+	{
+		return ((r == null) || (r.w <= 0) || (r.h <= 0)) ? true : false;
+	}
+
+	[Inline] public static c_bool SDL_RectsEqual(SDL_Rect* a, SDL_Rect* b)
+	{
+		return (a != null && b != null && (a.x == b.x) && (a.y == b.y) &&
+			(a.w == b.w) && (a.h == b.h)) ? true : false;
+	}
+
+	[Inline] public static c_bool SDL_PointInRectFloat(SDL_FPoint* p, SDL_FRect* r)
+	{
+		return (p != null && r != null && (p.x >= r.x) && (p.x <= (r.x + r.w)) &&
+			(p.y >= r.y) && (p.y <= (r.y + r.h))) ? true : false;
+	}
+
+	[Inline] public static c_bool SDL_RectEmptyFloat(SDL_FRect* r)
+	{
+		return ((r == null) || (r.w < 0.0f) || (r.h < 0.0f)) ? true : false;
+	}
+
+	[Inline] public static c_bool SDL_RectsEqualEpsilon(SDL_FRect* a, SDL_FRect* b, float epsilon)
+	{
+		return (a != null && b != null && ((a == b) ||
+			((SDL_fabsf(a.x - b.x) <= epsilon) &&
+			(SDL_fabsf(a.y - b.y) <= epsilon) &&
+			(SDL_fabsf(a.w - b.w) <= epsilon) &&
+			(SDL_fabsf(a.h - b.h) <= epsilon))))
+			? true : false;
+	}
+
+	[Inline] public static c_bool SDL_RectsEqualFloat(SDL_FRect* a, SDL_FRect* b)
+	{
+		return SDL_RectsEqualEpsilon(a, b, SDL_FLT_EPSILON);
+	}
+
 	[CLink] public static extern c_bool SDL_HasRectIntersection(SDL_Rect* A, SDL_Rect* B);
 
 	[CLink] public static extern c_bool SDL_GetRectIntersection(SDL_Rect* A, SDL_Rect* B, SDL_Rect* result);
@@ -4244,7 +5329,7 @@ static
 
 	[CLink] public static extern c_bool SDL_GetRectAndLineIntersectionFloat(SDL_FRect* rect, float* X1, float* Y1, float* X2, float* Y2);
 
-	//SDL_render.h
+		 //SDL_render.h
 
 	public struct SDL_Renderer;
 
@@ -4260,27 +5345,120 @@ static
 	[CRepr]
 	public struct SDL_Texture
 	{
-		public SDL_PixelFormat format;     /**< The format of the texture, read-only */
-		public c_int w;                      /**< The width of the texture, read-only. */
-		public c_int h;                      /**< The height of the texture, read-only. */
+		public SDL_PixelFormat format; /**< The format of the texture, read-only */
+		public c_int w; /**< The width of the texture, read-only. */
+		public c_int h; /**< The height of the texture, read-only. */
 
-		public c_int refcount;               /**< Application reference count, used when freeing texture */
+		public c_int refcount; /**< Application reference count, used when freeing texture */
 	}
 
 	public enum SDL_TextureAccess : c_int
 	{
-		SDL_TEXTUREACCESS_STATIC,    /**< Changes rarely, not lockable */
+		SDL_TEXTUREACCESS_STATIC, /**< Changes rarely, not lockable */
 		SDL_TEXTUREACCESS_STREAMING, /**< Changes frequently, lockable */
-		SDL_TEXTUREACCESS_TARGET     /**< Texture can be used as a render target */
+		SDL_TEXTUREACCESS_TARGET /**< Texture can be used as a render target */
 	}
 
 	[CRepr]
 	public struct SDL_Vertex
 	{
-		public SDL_FPoint position;        /**< Vertex position, in SDL_Renderer coordinates  */
-		public SDL_FColor color;           /**< Vertex color */
-		public SDL_FPoint tex_coord;       /**< Normalized texture coordinates, if needed */
+		public SDL_FPoint position; /**< Vertex position, in SDL_Renderer coordinates  */
+		public SDL_FColor color; /**< Vertex color */
+		public SDL_FPoint tex_coord; /**< Normalized texture coordinates, if needed */
 	}
+
+	public const c_char* SDL_SOFTWARE_RENDERER   = "software";
+
+	public const c_char* SDL_PROP_RENDERER_CREATE_NAME_STRING                                = "SDL.renderer.create.name";
+	public const c_char* SDL_PROP_RENDERER_CREATE_WINDOW_POINTER                             = "SDL.renderer.create.window";
+	public const c_char* SDL_PROP_RENDERER_CREATE_SURFACE_POINTER                            = "SDL.renderer.create.surface";
+	public const c_char* SDL_PROP_RENDERER_CREATE_OUTPUT_COLORSPACE_NUMBER                   = "SDL.renderer.create.output_colorspace";
+	public const c_char* SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER                       = "SDL.renderer.create.present_vsync";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_INSTANCE_POINTER                    = "SDL.renderer.create.vulkan.instance";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_SURFACE_NUMBER                      = "SDL.renderer.create.vulkan.surface";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_PHYSICAL_DEVICE_POINTER             = "SDL.renderer.create.vulkan.physical_device";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_DEVICE_POINTER                      = "SDL.renderer.create.vulkan.device";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER  = "SDL.renderer.create.vulkan.graphics_queue_family_index";
+	public const c_char* SDL_PROP_RENDERER_CREATE_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER   = "SDL.renderer.create.vulkan.present_queue_family_index";
+	public const c_char* SDL_PROP_RENDERER_NAME_STRING                               = "SDL.renderer.name";
+	public const c_char* SDL_PROP_RENDERER_WINDOW_POINTER                            = "SDL.renderer.window";
+	public const c_char* SDL_PROP_RENDERER_SURFACE_POINTER                           = "SDL.renderer.surface";
+	public const c_char* SDL_PROP_RENDERER_VSYNC_NUMBER                              = "SDL.renderer.vsync";
+	public const c_char* SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER                   = "SDL.renderer.max_texture_size";
+	public const c_char* SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER                   = "SDL.renderer.texture_formats";
+	public const c_char* SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER                  = "SDL.renderer.output_colorspace";
+	public const c_char* SDL_PROP_RENDERER_HDR_ENABLED_BOOLEAN                       = "SDL.renderer.HDR_enabled";
+	public const c_char* SDL_PROP_RENDERER_SDR_WHITE_POINT_FLOAT                     = "SDL.renderer.SDR_white_point";
+	public const c_char* SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT                        = "SDL.renderer.HDR_headroom";
+	public const c_char* SDL_PROP_RENDERER_D3D9_DEVICE_POINTER                       = "SDL.renderer.d3d9.device";
+	public const c_char* SDL_PROP_RENDERER_D3D11_DEVICE_POINTER                      = "SDL.renderer.d3d11.device";
+	public const c_char* SDL_PROP_RENDERER_D3D11_SWAPCHAIN_POINTER                   = "SDL.renderer.d3d11.swap_chain";
+	public const c_char* SDL_PROP_RENDERER_D3D12_DEVICE_POINTER                      = "SDL.renderer.d3d12.device";
+	public const c_char* SDL_PROP_RENDERER_D3D12_SWAPCHAIN_POINTER                   = "SDL.renderer.d3d12.swap_chain";
+	public const c_char* SDL_PROP_RENDERER_D3D12_COMMAND_QUEUE_POINTER               = "SDL.renderer.d3d12.command_queue";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_INSTANCE_POINTER                   = "SDL.renderer.vulkan.instance";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_SURFACE_NUMBER                     = "SDL.renderer.vulkan.surface";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_PHYSICAL_DEVICE_POINTER            = "SDL.renderer.vulkan.physical_device";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_DEVICE_POINTER                     = "SDL.renderer.vulkan.device";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER = "SDL.renderer.vulkan.graphics_queue_family_index";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER  = "SDL.renderer.vulkan.present_queue_family_index";
+	public const c_char* SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER       = "SDL.renderer.vulkan.swapchain_image_count";
+	public const c_char* SDL_PROP_RENDERER_GPU_DEVICE_POINTER                        = "SDL.renderer.gpu.device";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER           = "SDL.texture.create.colorspace";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER               = "SDL.texture.create.format";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER               = "SDL.texture.create.access";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER                = "SDL.texture.create.width";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER               = "SDL.texture.create.height";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT       = "SDL.texture.create.SDR_white_point";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_HDR_HEADROOM_FLOAT          = "SDL.texture.create.HDR_headroom";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_POINTER       = "SDL.texture.create.d3d11.texture";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_U_POINTER     = "SDL.texture.create.d3d11.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D11_TEXTURE_V_POINTER     = "SDL.texture.create.d3d11.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_POINTER       = "SDL.texture.create.d3d12.texture";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_U_POINTER     = "SDL.texture.create.d3d12.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_D3D12_TEXTURE_V_POINTER     = "SDL.texture.create.d3d12.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_METAL_PIXELBUFFER_POINTER   = "SDL.texture.create.metal.pixelbuffer";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_NUMBER       = "SDL.texture.create.opengl.texture";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_UV_NUMBER    = "SDL.texture.create.opengl.texture_uv";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_U_NUMBER     = "SDL.texture.create.opengl.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGL_TEXTURE_V_NUMBER     = "SDL.texture.create.opengl.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_NUMBER    = "SDL.texture.create.opengles2.texture";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_UV_NUMBER = "SDL.texture.create.opengles2.texture_uv";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_U_NUMBER  = "SDL.texture.create.opengles2.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_OPENGLES2_TEXTURE_V_NUMBER  = "SDL.texture.create.opengles2.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_CREATE_VULKAN_TEXTURE_NUMBER       = "SDL.texture.create.vulkan.texture";
+	public const c_char* SDL_PROP_TEXTURE_COLORSPACE_NUMBER                  = "SDL.texture.colorspace";
+	public const c_char* SDL_PROP_TEXTURE_FORMAT_NUMBER                      = "SDL.texture.format";
+	public const c_char* SDL_PROP_TEXTURE_ACCESS_NUMBER                      = "SDL.texture.access";
+	public const c_char* SDL_PROP_TEXTURE_WIDTH_NUMBER                       = "SDL.texture.width";
+	public const c_char* SDL_PROP_TEXTURE_HEIGHT_NUMBER                      = "SDL.texture.height";
+	public const c_char* SDL_PROP_TEXTURE_SDR_WHITE_POINT_FLOAT              = "SDL.texture.SDR_white_point";
+	public const c_char* SDL_PROP_TEXTURE_HDR_HEADROOM_FLOAT                 = "SDL.texture.HDR_headroom";
+	public const c_char* SDL_PROP_TEXTURE_D3D11_TEXTURE_POINTER              = "SDL.texture.d3d11.texture";
+	public const c_char* SDL_PROP_TEXTURE_D3D11_TEXTURE_U_POINTER            = "SDL.texture.d3d11.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_D3D11_TEXTURE_V_POINTER            = "SDL.texture.d3d11.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_D3D12_TEXTURE_POINTER              = "SDL.texture.d3d12.texture";
+	public const c_char* SDL_PROP_TEXTURE_D3D12_TEXTURE_U_POINTER            = "SDL.texture.d3d12.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_D3D12_TEXTURE_V_POINTER            = "SDL.texture.d3d12.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEXTURE_NUMBER              = "SDL.texture.opengl.texture";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEXTURE_UV_NUMBER           = "SDL.texture.opengl.texture_uv";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEXTURE_U_NUMBER            = "SDL.texture.opengl.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEXTURE_V_NUMBER            = "SDL.texture.opengl.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEXTURE_TARGET_NUMBER       = "SDL.texture.opengl.target";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEX_W_FLOAT                 = "SDL.texture.opengl.tex_w";
+	public const c_char* SDL_PROP_TEXTURE_OPENGL_TEX_H_FLOAT                 = "SDL.texture.opengl.tex_h";
+	public const c_char* SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_NUMBER           = "SDL.texture.opengles2.texture";
+	public const c_char* SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_UV_NUMBER        = "SDL.texture.opengles2.texture_uv";
+	public const c_char* SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_U_NUMBER         = "SDL.texture.opengles2.texture_u";
+	public const c_char* SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_V_NUMBER         = "SDL.texture.opengles2.texture_v";
+	public const c_char* SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_TARGET_NUMBER    = "SDL.texture.opengles2.target";
+	public const c_char* SDL_PROP_TEXTURE_VULKAN_TEXTURE_NUMBER              = "SDL.texture.vulkan.texture";
+
+
+
+	public const uint32 SDL_RENDERER_VSYNC_DISABLED = 0;
+	public const uint32 SDL_RENDERER_VSYNC_ADAPTIVE = uint32(-1);
+	public const uint32 SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE = 8;
 
 	[CLink] public static extern c_int SDL_GetNumRenderDrivers();
 
@@ -4456,7 +5634,10 @@ static
 
 	[CLink] public static extern c_bool SDL_RenderDebugText(SDL_Renderer* renderer, float x, float y, c_char* str);
 
-	//SDL_sensor.h
+	 [CLink] public static extern c_bool SDL_RenderTextureAffine(SDL_Renderer* renderer, SDL_Texture* texture, SDL_FRect* srcrect, SDL_FPoint* origin, SDL_FPoint* right, SDL_FPoint* down);
+
+
+		 //SDL_sensor.h
 
 	public typealias SDL_SensorID = uint32;
 
@@ -4473,6 +5654,9 @@ static
 	}
 
 	public struct SDL_Sensor;
+
+	public const float SDL_STANDARD_GRAVITY     = 9.80665f;
+
 
 	[CLink] public static extern SDL_SensorID*  SDL_GetSensors(c_int* count);
 
@@ -4502,15 +5686,42 @@ static
 
 	[CLink] public static extern void SDL_UpdateSensors();
 
-	//SDL_stdinc.h
+		 //SDL_stdinc.h
+
+	public const uint SDL_SIZE_MAX = uint.MaxValue;
+
+	public static uint32 SDL_FOURCC(c_char A, c_char B, c_char C, c_char D)
+	{
+		return (((uint32(uint8(A))) << 0) | ((uint32(uint8(B))) << 8) | ((uint32(uint8(C))) << 16) | ((uint32(uint8(D))) << 24));
+	}
+
+	public typealias SDL_Time = int64;
 
 	public typealias SDL_iconv_t = SDL_iconv_data_t*;
+
+	public const SDL_Time SDL_MAX_TIME = int64.MaxValue;
+
+	public const SDL_Time SDL_MIN_TIME = int64.MinValue;
+
+	public const float SDL_FLT_EPSILON = float.Epsilon;
 
 	[CRepr]
 	public struct SDL_iconv_data_t
 	{
 		public c_int src_fmt;
 		public c_int dst_fmt;
+	}
+
+
+	public const double SDL_PI_D   = 3.141592653589793238462643383279502884; /**< pi (double) */
+	public const float SDL_PI_F   = 3.141592653589793238462643383279502884F; /**< pi (float) */
+
+	public enum SDL_ICONV : uint
+	{
+		SDL_ICONV_ERROR     = -1, /**< Generic error. Check SDL_GetError()? */
+		SDL_ICONV_E2BIG     = -2, /**< Output buffer was too small. */
+		SDL_ICONV_EILSEQ    = -3, /**< Invalid input sequence was encountered. */
+		SDL_ICONV_EINVAL    = -4 /**< Incomplete input sequence was encountered. */
 	}
 
 	public typealias SDL_CompareCallback_r = function c_int(void* userdata, void* a, void* b);
@@ -4691,10 +5902,6 @@ static
 
 	[CLink] public static extern c_char* SDL_ultoa(c_ulong value, c_char* str, c_int radix);
 
-	[CLink] public static extern c_char* SDL_lltoa(c_longlong value, c_char* str, c_int radix);
-
-	[CLink] public static extern c_char* SDL_ulltoa(c_ulonglong value, c_char* str, c_int radix);
-
 	[CLink] public static extern c_int SDL_atoi(c_char* str);
 
 	[CLink] public static extern double SDL_atof(c_char* str);
@@ -4702,10 +5909,6 @@ static
 	[CLink] public static extern c_long SDL_strtol(c_char* str, c_char** endp, c_int base_);
 
 	[CLink] public static extern c_ulong SDL_strtoul(c_char* str, c_char** endp, c_int base_);
-
-	[CLink] public static extern c_longlong SDL_strtoll(c_char* str, c_char** endp, c_int base_);
-
-	[CLink] public static extern c_ulonglong SDL_strtoull(c_char* str, c_char** endp, c_int base_);
 
 	[CLink] public static extern double SDL_strtod(c_char* str, c_char** endp);
 
@@ -4743,13 +5946,13 @@ static
 
 	[CLink] public static extern void SDL_srand(int64 seed);
 
-	[CLink] public static extern int32 SDL_rand(int32 n);
+	[CLink] public static extern c_int SDL_rand(int32 n);
 
 	[CLink] public static extern float SDL_randf();
 
 	[CLink] public static extern uint32 SDL_rand_bits();
 
-	[CLink] public static extern int32 SDL_rand_r(uint64* state, int32 n);
+	[CLink] public static extern c_int SDL_rand_r(uint64* state, c_int n);
 
 	[CLink] public static extern float SDL_randf_r(uint64* state);
 
@@ -4859,7 +6062,60 @@ static
 
 	[CLink] public static extern c_char* SDL_iconv_string(c_char* tocode, c_char* fromcode, c_char* inbuf, c_size inbytesleft);
 
-	//SDL_storage.h
+	public static uint32 SDL_min(uint32 x, uint32 y) => (((x) < (y)) ? (x) : (y));
+
+	public static uint32 SDL_max(uint32 x, uint32 y) => (((x) > (y)) ? (x) : (y));
+
+	public static uint32 SDL_clamp(uint32 x, uint32 a, uint32 b) => (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)));
+
+	 [CLink] public static extern c_char* SDL_ltoa(int64 value, c_char* str, c_int radix);
+
+	 [CLink] public static extern c_char* SDL_ultoa(uint64 value, c_char* str, c_int radix);
+
+#if !SDL_NOLONGLONG
+
+	 [CLink] public static extern c_char* SDL_lltoa(int64 value, c_char* str, c_int radix);
+
+	 [CLink] public static extern c_char* SDL_ulltoa(uint64 value, c_char* str, c_int radix);
+#endif
+
+#if !SDL_NOLONGLONG
+
+	 [CLink] public static extern int64 SDL_strtoll(c_char* str, c_char** endp, c_int @base);
+
+	 [CLink] public static extern uint64 SDL_strtoull(c_char* str, c_char** endp, c_int @base);
+#endif
+
+	 [CLink] public static extern void SDL_srand(uint64 seed);
+
+	public static c_char* SDL_iconv_utf8_locale(c_char* S)  =>  SDL_iconv_string("", "UTF-8", S, SDL_strlen(S) + 1);
+
+	public static uint16* SDL_iconv_utf8_ucs2(c_char* S)   =>   (uint16*)SDL_iconv_string("UCS-2", "UTF-8", S, SDL_strlen(S) + 1);
+
+	public static uint32* SDL_iconv_utf8_ucs4(c_char* S)   =>   (uint32*)SDL_iconv_string("UCS-4", "UTF-8", S, SDL_strlen(S) + 1);
+
+	public static c_char* SDL_iconv_wchar_utf8(c_wchar* S)   =>  SDL_iconv_string("UTF-8", "WCHAR_T", (c_char*)S, (SDL_wcslen(S) + 1) * sizeof(c_wchar));
+
+	[Inline] public static c_bool SDL_size_mul_check_overflow(uint a, uint b, uint* ret)
+	{
+		if (a != 0 && b > SDL_SIZE_MAX / a)
+		{
+			return false;
+		}
+		*ret = a * b;
+		return true;
+	}
+
+	[Inline] public static c_bool SDL_size_add_check_overflow(uint a, uint b, uint* ret)
+	{
+		if (b > SDL_SIZE_MAX - a)
+		{
+			return false;
+		}
+		*ret = a + b;
+		return true;
+	}
+	 //SDL_storage.h
 
 	[CRepr]
 	public struct SDL_Storage;
@@ -4871,37 +6127,43 @@ static
 		public uint32 version;
 
 		/* Called when the storage is closed */
-		public function bool(void* userdata) close;
+		public function c_bool(void* userdata) close;
 
 		/* Optional, returns whether the storage is currently ready for access */
-		public function bool(void* userdata) ready;
+		public function c_bool(void* userdata) ready;
 
 		/* Enumerate a directory, optional for write-only storage */
-		public function bool(void* userdata, c_char* path, SDL_EnumerateDirectoryCallback callback, void* callback_userdata) enumerate;
+		public function c_bool(void* userdata, c_char* path, SDL_EnumerateDirectoryCallback callback, void* callback_userdata) enumerate;
 
 		/* Get path information, optional for write-only storage */
-		public function bool(void* userdata, c_char* path, SDL_PathInfo* info) info;
+		public function c_bool(void* userdata, c_char* path, SDL_PathInfo* info) info;
 
 		/* Read a file from storage, optional for write-only storage */
-		public function bool(void* userdata, c_char* path, void* destination, uint64 length) read_file;
+		public function c_bool(void* userdata, c_char* path, void* destination, uint64 length) read_file;
 
 		/* Write a file to storage, optional for read-only storage */
-		public function bool(void* userdata, c_char* path, void* source, uint64 length) write_file;
+		public function c_bool(void* userdata, c_char* path, void* source, uint64 length) write_file;
 
 		/* Create a directory, optional for read-only storage */
-		public function bool(void* userdata, c_char* path) mkdir;
+		public function c_bool(void* userdata, c_char* path) mkdir;
 
 		/* Remove a file or empty directory, optional for read-only storage */
-		public function bool(void* userdata, c_char* path) remove;
+		public function c_bool(void* userdata, c_char* path) remove;
 
 		/* Rename a path, optional for read-only storage */
-		public function bool(void* userdata, c_char* oldpath, c_char* newpath) rename;
+		public function c_bool(void* userdata, c_char* oldpath, c_char* newpath) rename;
 
 		/* Copy a file, optional for read-only storage */
-		public function bool(void* userdata, c_char* oldpath, c_char* newpath) copy;
+		public function c_bool(void* userdata, c_char* oldpath, c_char* newpath) copy;
 
 		/* Get the space remaining, optional for read-only storage */
 		public function uint64(void* userdata) space_remaining;
+	}
+
+	public static void Assert_SDL_StorageInterface_SIZE()
+	{
+		Compiler.Assert((sizeof(void*) == 4 && sizeof(SDL_StorageInterface) == 48) ||
+			(sizeof(void*) == 8 && sizeof(SDL_StorageInterface) == 96));
 	}
 
 	[CLink] public static extern SDL_Storage* SDL_OpenTitleStorage(c_char* override_, SDL_PropertiesID props);
@@ -4971,10 +6233,19 @@ static
 
 	public enum SDL_FlipMode : c_int
 	{
-		SDL_FLIP_NONE,          /**< Do not flip */
-		SDL_FLIP_HORIZONTAL,    /**< flip horizontally */
-		SDL_FLIP_VERTICAL       /**< flip vertically */
+		SDL_FLIP_NONE, /**< Do not flip */
+		SDL_FLIP_HORIZONTAL, /**< flip horizontally */
+		SDL_FLIP_VERTICAL /**< flip vertically */
 	}
+
+	public static c_bool SDL_MUSTLOCK(SDL_Surface S)
+	{
+		return ((S.flags & .SDL_SURFACE_LOCK_NEEDED) == .SDL_SURFACE_LOCK_NEEDED);
+	}
+
+	public const c_char* SDL_PROP_SURFACE_SDR_WHITE_POINT_FLOAT              = "SDL.surface.SDR_white_point";
+	public const c_char* SDL_PROP_SURFACE_HDR_HEADROOM_FLOAT                 = "SDL.surface.HDR_headroom";
+	public const c_char* SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING            = "SDL.surface.tonemap";
 
 	[CLink] public static extern SDL_Surface* SDL_CreateSurface(c_int width, c_int height, SDL_PixelFormat format);
 
@@ -5090,7 +6361,9 @@ static
 
 	[CLink] public static extern c_bool SDL_WriteSurfacePixelFloat(SDL_Surface* surface, c_int x, c_int y, float r, float g, float b, float a);
 
-	//SDL_system.h
+	[CLink] public static extern c_bool SDL_StretchSurface(SDL_Surface* src, SDL_Rect* srcrect, SDL_Surface* dst, SDL_Rect* dstrect, SDL_ScaleMode scaleMode);
+
+		 //SDL_system.h
 
 	public typealias SDL_WindowsMessageHook = function c_bool(void* userdata, MSG* msg);
 
@@ -5121,8 +6394,6 @@ static
 
 	[CLink] public static extern c_bool SDL_SetLinuxThreadPriorityAndPolicy(int64 threadID, c_int sdlPriority, c_int schedPolicy);
 
-	//TODO: [CLink] public static extern c_bool SDL_SetiOSAnimationCallback(SDL_Window* window, c_int interval, SDL_iOSAnimationCallback callback, void* callbackParam);
-
 	[CLink] public static extern void SDL_SetiOSEventPump(c_bool enabled);
 
 	[CLink] public static extern void*  SDL_GetAndroidJNIEnv();
@@ -5131,7 +6402,7 @@ static
 
 	[CLink] public static extern c_int SDL_GetAndroidSDKVersion();
 
-	[CLink] public static extern bool SDL_IsChromebook();
+	[CLink] public static extern c_bool SDL_IsChromebook();
 
 	[CLink] public static extern c_bool SDL_IsDeXMode();
 
@@ -5144,8 +6415,6 @@ static
 	[CLink] public static extern c_char*  SDL_GetAndroidExternalStoragePath();
 
 	[CLink] public static extern c_char*  SDL_GetAndroidCachePath();
-
-	//TODO: [CLink] public static extern c_bool SDL_RequestAndroidPermission(c_char* permission, SDL_RequestAndroidPermissionCallback cb, void* userdata);
 
 	[CLink] public static extern c_bool SDL_ShowAndroidToast(c_char* message, c_int duration, c_int gravity, c_int xoffset, c_int yoffset);
 
@@ -5171,9 +6440,6 @@ static
 
 	[CLink] public static extern void SDL_OnApplicationDidChangeStatusBarOrientation();
 
-	//TODO: [CLink] public static extern c_bool SDL_GetGDKTaskQueue(XTaskQueueHandle* outTaskQueue);
-
-	//TODO: [CLink] public static extern c_bool SDL_GetGDKDefaultUser(XUserHandle* outUserHandle);
 
 	//SDL_thread.h
 
@@ -5193,6 +6459,19 @@ static
 	}
 
 	public typealias SDL_TLSID = SDL_AtomicInt;
+
+	public enum SDL_ThreadState : c_int
+	{
+		SDL_THREAD_UNKNOWN, /**< The thread is not valid */
+		SDL_THREAD_ALIVE, /**< The thread is currently running */
+		SDL_THREAD_DETACHED, /**< The thread is detached and can't be waited on */
+		SDL_THREAD_COMPLETE /**< The thread has finished and should be cleaned up with SDL_WaitThread() */
+	}
+
+	public const c_char* SDL_PROP_THREAD_CREATE_ENTRY_FUNCTION_POINTER                  = "SDL.thread.create.entry_function";
+	public const c_char* SDL_PROP_THREAD_CREATE_NAME_STRING                             = "SDL.thread.create.name";
+	public const c_char* SDL_PROP_THREAD_CREATE_USERDATA_POINTER                        = "SDL.thread.create.userdata";
+	public const c_char* SDL_PROP_THREAD_CREATE_STACKSIZE_NUMBER                        = "SDL.thread.create.stacksize";
 
 	public typealias SDL_TLSDestructorCallback = function void(void* value);
 
@@ -5237,8 +6516,6 @@ static
 		SDL_TIME_FORMAT_12HR = 1 /**< 12 hour time */
 	}
 
-	public typealias SDL_Time = int64;
-
 	[CRepr]
 	public struct SDL_DateTime
 	{
@@ -5271,7 +6548,6 @@ static
 
 	[CLink] public static extern c_int SDL_GetDayOfWeek(c_int year, c_int month, c_int day);
 
-
 	//SDL_timer.h
 
 	public typealias SDL_TimerID = uint32;
@@ -5279,6 +6555,28 @@ static
 	public typealias SDL_TimerCallback = function uint32(void* userdata, SDL_TimerID timerID, uint32 interval);
 
 	public typealias SDL_NSTimerCallback = function uint64(void* userdata, SDL_TimerID timerID, uint64 interval);
+
+	public const uint64 SDL_MS_PER_SECOND  = 1000;
+
+	public const uint64 SDL_US_PER_SECOND =  1000000;
+
+	public const uint64 SDL_NS_PER_SECOND  = 1000000000L;
+
+	public const uint64 SDL_NS_PER_MS   =    1000000;
+
+	public const uint64 SDL_NS_PER_US  =     1000;
+
+	public static uint64 SDL_SECONDS_TO_NS(uint64 S)  =>  (((uint64)(S)) * SDL_NS_PER_SECOND);
+
+	public static uint64 SDL_NS_TO_SECONDS(uint64 NS)  => ((NS) / SDL_NS_PER_SECOND);
+
+	public static uint64 SDL_MS_TO_NS(uint64 MS)   =>     (((uint64)(MS)) * SDL_NS_PER_MS);
+
+	public static uint64 SDL_NS_TO_MS(uint64 NS)    =>    ((NS) / SDL_NS_PER_MS);
+
+	public static uint64 SDL_US_TO_NS(uint64 US)      =>  (((uint64)(US)) * SDL_NS_PER_US);
+
+	public static uint64 SDL_NS_TO_US(uint64 NS)    =>    ((NS) / SDL_NS_PER_US);
 
 	[CLink] public static extern uint64 SDL_GetTicks();
 
@@ -5321,6 +6619,10 @@ static
 		public float pressure; /**< the quantity of pressure applied, normalized (0...1) */
 	}
 
+	public const uint32 SDL_TOUCH_MOUSEID = ((SDL_MouseID) - 1);
+
+	public const uint64 SDL_MOUSE_TOUCHID = ((SDL_TouchID) - 1);
+
 	public typealias SDL_FingerID = uint64;
 
 	[CLink] public static extern SDL_TouchID* SDL_GetTouchDevices(c_int* count);
@@ -5337,11 +6639,93 @@ static
 
 	[CLink] public static extern c_char* SDL_GetRevision();
 
-	//SDL_video.h
+
+	public const uint32 SDL_MAJOR_VERSION  = 3;
+
+	public const uint32 SDL_MINOR_VERSION  = 2;
+
+	public const uint32 SDL_MICRO_VERSION  = 4;
+
+	public static uint32 SDL_VERSIONNUM(uint32 major, uint32 minor, uint32 patch) => ((major) * 1000000 + (minor) * 1000 + (patch));
+
+	public static uint32 SDL_VERSIONNUM_MAJOR(uint32 version)  => ((version) / 1000000);
+
+	public static uint32 SDL_VERSIONNUM_MINOR(uint32 version) => (((version) / 1000) % 1000);
+
+	public static uint32 SDL_VERSIONNUM_MICRO(uint32 version) => ((version) % 1000);
+
+	public const uint32 SDL_VERSION = SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION);
+
+	public static c_bool SDL_VERSION_ATLEAST(uint32 X, uint32 Y, uint32 Z) => (SDL_VERSION >= SDL_VERSIONNUM(X, Y, Z));
+
+	//SDL_tray.h
+
+	public struct SDL_Tray;
+
+	public struct SDL_TrayMenu;
+
+	public struct SDL_TrayEntry;
+
+	public enum SDL_TrayEntryFlags : uint32
+	{
+		SDL_TRAYENTRY_BUTTON      = 0x00000001, /**< Make the entry a simple button. Required. */
+		SDL_TRAYENTRY_CHECKBOX    = 0x00000002, /**< Make the entry a checkbox. Required. */
+		SDL_TRAYENTRY_SUBMENU     = 0x00000004, /**< Prepare the entry to have a submenu. Required */
+		SDL_TRAYENTRY_DISABLED    = 0x80000000, /**< Make the entry disabled. Optional. */
+		SDL_TRAYENTRY_CHECKED     = 0x40000000, /**< Make the entry checked. This is valid only for checkboxes. Optional. */
+	}
+
+	public typealias SDL_TrayCallback = function void(void* userdata, SDL_TrayEntry* entry);
+
+	[CLink] public static extern SDL_Tray* SDL_CreateTray(SDL_Surface* icon, c_char* tooltip);
+
+	[CLink] public static extern void SDL_SetTrayIcon(SDL_Tray* tray, SDL_Surface* icon);
+
+	[CLink] public static extern void SDL_SetTrayTooltip(SDL_Tray* tray, c_char* tooltip);
+
+	[CLink] public static extern SDL_TrayMenu* SDL_CreateTrayMenu(SDL_Tray* tray);
+
+	[CLink] public static extern SDL_TrayMenu* SDL_CreateTraySubmenu(SDL_TrayEntry* entry);
+
+	[CLink] public static extern SDL_TrayMenu* SDL_GetTrayMenu(SDL_Tray* tray);
+
+	[CLink] public static extern SDL_TrayMenu* SDL_GetTraySubmenu(SDL_TrayEntry* entry);
+
+	[CLink] public static extern SDL_TrayEntry** SDL_GetTrayEntries(SDL_TrayMenu* menu, c_int* count);
+
+	[CLink] public static extern void SDL_RemoveTrayEntry(SDL_TrayEntry* entry);
+
+	[CLink] public static extern SDL_TrayEntry* SDL_InsertTrayEntryAt(SDL_TrayMenu* menu, c_int pos, c_char* label, SDL_TrayEntryFlags flags);
+
+	[CLink] public static extern void SDL_SetTrayEntryLabel(SDL_TrayEntry* entry, c_char* label);
+
+	[CLink] public static extern c_char*  SDL_GetTrayEntryLabel(SDL_TrayEntry* entry);
+
+	[CLink] public static extern void SDL_SetTrayEntryChecked(SDL_TrayEntry* entry, c_bool @checked);
+
+	[CLink] public static extern c_bool SDL_GetTrayEntryChecked(SDL_TrayEntry* entry);
+
+	[CLink] public static extern void SDL_SetTrayEntryEnabled(SDL_TrayEntry* entry, c_bool enabled);
+
+	[CLink] public static extern c_bool SDL_GetTrayEntryEnabled(SDL_TrayEntry* entry);
+
+	[CLink] public static extern void SDL_SetTrayEntryCallback(SDL_TrayEntry* entry, SDL_TrayCallback callback, void* userdata);
+
+	[CLink] public static extern void SDL_ClickTrayEntry(SDL_TrayEntry* entry);
+
+	[CLink] public static extern void SDL_DestroyTray(SDL_Tray* tray);
+
+	[CLink] public static extern SDL_TrayMenu* SDL_GetTrayEntryParent(SDL_TrayEntry* entry);
+
+	[CLink] public static extern SDL_TrayEntry* SDL_GetTrayMenuParentEntry(SDL_TrayMenu* menu);
+
+	[CLink] public static extern SDL_Tray* SDL_GetTrayMenuParentTray(SDL_TrayMenu* menu);
+
+	[CLink] public static extern void SDL_UpdateTrays();
+
+	 //SDL_video.h
 
 	public struct SDL_Window;
-
-	public struct SDL_GLContext;
 
 	public typealias SDL_EGLAttribArrayCallback = function SDL_EGLAttrib*(void* userdata);
 
@@ -5476,6 +6860,181 @@ static
 		SDL_SYSTEM_THEME_UNKNOWN, /**< Unknown system theme */
 		SDL_SYSTEM_THEME_LIGHT, /**< Light colored system theme */
 		SDL_SYSTEM_THEME_DARK /**< Dark colored system theme */
+	}
+
+	public const c_char* SDL_PROP_DISPLAY_HDR_ENABLED_BOOLEAN             = "SDL.display.HDR_enabled";
+	public const c_char* SDL_PROP_DISPLAY_KMSDRM_PANEL_ORIENTATION_NUMBER = "SDL.display.KMSDRM.panel_orientation";
+
+	public const c_char* SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN               = "SDL.window.create.always_on_top";
+	public const c_char* SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN                  = "SDL.window.create.borderless";
+	public const c_char* SDL_PROP_WINDOW_CREATE_FOCUSABLE_BOOLEAN                   = "SDL.window.create.focusable";
+	public const c_char* SDL_PROP_WINDOW_CREATE_EXTERNAL_GRAPHICS_CONTEXT_BOOLEAN   = "SDL.window.create.external_graphics_context";
+	public const c_char* SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER                        = "SDL.window.create.flags";
+	public const c_char* SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN                  = "SDL.window.create.fullscreen";
+	public const c_char* SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER                       = "SDL.window.create.height";
+	public const c_char* SDL_PROP_WINDOW_CREATE_HIDDEN_BOOLEAN                      = "SDL.window.create.hidden";
+	public const c_char* SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN          = "SDL.window.create.high_pixel_density";
+	public const c_char* SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN                   = "SDL.window.create.maximized";
+	public const c_char* SDL_PROP_WINDOW_CREATE_MENU_BOOLEAN                        = "SDL.window.create.menu";
+	public const c_char* SDL_PROP_WINDOW_CREATE_METAL_BOOLEAN                       = "SDL.window.create.metal";
+	public const c_char* SDL_PROP_WINDOW_CREATE_MINIMIZED_BOOLEAN                   = "SDL.window.create.minimized";
+	public const c_char* SDL_PROP_WINDOW_CREATE_MODAL_BOOLEAN                       = "SDL.window.create.modal";
+	public const c_char* SDL_PROP_WINDOW_CREATE_MOUSE_GRABBED_BOOLEAN               = "SDL.window.create.mouse_grabbed";
+	public const c_char* SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN                      = "SDL.window.create.opengl";
+	public const c_char* SDL_PROP_WINDOW_CREATE_PARENT_POINTER                      = "SDL.window.create.parent";
+	public const c_char* SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN                   = "SDL.window.create.resizable";
+	public const c_char* SDL_PROP_WINDOW_CREATE_TITLE_STRING                        = "SDL.window.create.title";
+	public const c_char* SDL_PROP_WINDOW_CREATE_TRANSPARENT_BOOLEAN                 = "SDL.window.create.transparent";
+	public const c_char* SDL_PROP_WINDOW_CREATE_TOOLTIP_BOOLEAN                     = "SDL.window.create.tooltip";
+	public const c_char* SDL_PROP_WINDOW_CREATE_UTILITY_BOOLEAN                     = "SDL.window.create.utility";
+	public const c_char* SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN                      = "SDL.window.create.vulkan";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER                        = "SDL.window.create.width";
+	public const c_char* SDL_PROP_WINDOW_CREATE_X_NUMBER                            = "SDL.window.create.x";
+	public const c_char* SDL_PROP_WINDOW_CREATE_Y_NUMBER                            = "SDL.window.create.y";
+	public const c_char* SDL_PROP_WINDOW_CREATE_COCOA_WINDOW_POINTER                = "SDL.window.create.cocoa.window";
+	public const c_char* SDL_PROP_WINDOW_CREATE_COCOA_VIEW_POINTER                  = "SDL.window.create.cocoa.view";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WAYLAND_SURFACE_ROLE_CUSTOM_BOOLEAN = "SDL.window.create.wayland.surface_role_custom";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WAYLAND_CREATE_EGL_WINDOW_BOOLEAN   = "SDL.window.create.wayland.create_egl_window";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WAYLAND_WL_SURFACE_POINTER          = "SDL.window.create.wayland.wl_surface";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WIN32_HWND_POINTER                  = "SDL.window.create.win32.hwnd";
+	public const c_char* SDL_PROP_WINDOW_CREATE_WIN32_PIXEL_FORMAT_HWND_POINTER     = "SDL.window.create.win32.pixel_format_hwnd";
+	public const c_char* SDL_PROP_WINDOW_CREATE_X11_WINDOW_NUMBER                   = "SDL.window.create.x11.window";
+
+	public const c_char* SDL_PROP_WINDOW_SHAPE_POINTER                               = "SDL.window.shape";
+	public const c_char* SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN                         = "SDL.window.HDR_enabled";
+	public const c_char* SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT                       = "SDL.window.SDR_white_level";
+	public const c_char* SDL_PROP_WINDOW_HDR_HEADROOM_FLOAT                          = "SDL.window.HDR_headroom";
+	public const c_char* SDL_PROP_WINDOW_ANDROID_WINDOW_POINTER                      = "SDL.window.android.window";
+	public const c_char* SDL_PROP_WINDOW_ANDROID_SURFACE_POINTER                     = "SDL.window.android.surface";
+	public const c_char* SDL_PROP_WINDOW_UIKIT_WINDOW_POINTER                        = "SDL.window.uikit.window";
+	public const c_char* SDL_PROP_WINDOW_UIKIT_METAL_VIEW_TAG_NUMBER                 = "SDL.window.uikit.metal_view_tag";
+	public const c_char* SDL_PROP_WINDOW_UIKIT_OPENGL_FRAMEBUFFER_NUMBER             = "SDL.window.uikit.opengl.framebuffer";
+	public const c_char* SDL_PROP_WINDOW_UIKIT_OPENGL_RENDERBUFFER_NUMBER            = "SDL.window.uikit.opengl.renderbuffer";
+	public const c_char* SDL_PROP_WINDOW_UIKIT_OPENGL_RESOLVE_FRAMEBUFFER_NUMBER     = "SDL.window.uikit.opengl.resolve_framebuffer";
+	public const c_char* SDL_PROP_WINDOW_KMSDRM_DEVICE_INDEX_NUMBER                  = "SDL.window.kmsdrm.dev_index";
+	public const c_char* SDL_PROP_WINDOW_KMSDRM_DRM_FD_NUMBER                        = "SDL.window.kmsdrm.drm_fd";
+	public const c_char* SDL_PROP_WINDOW_KMSDRM_GBM_DEVICE_POINTER                   = "SDL.window.kmsdrm.gbm_dev";
+	public const c_char* SDL_PROP_WINDOW_COCOA_WINDOW_POINTER                        = "SDL.window.cocoa.window";
+	public const c_char* SDL_PROP_WINDOW_COCOA_METAL_VIEW_TAG_NUMBER                 = "SDL.window.cocoa.metal_view_tag";
+	public const c_char* SDL_PROP_WINDOW_OPENVR_OVERLAY_ID                           = "SDL.window.openvr.overlay_id";
+	public const c_char* SDL_PROP_WINDOW_VIVANTE_DISPLAY_POINTER                     = "SDL.window.vivante.display";
+	public const c_char* SDL_PROP_WINDOW_VIVANTE_WINDOW_POINTER                      = "SDL.window.vivante.window";
+	public const c_char* SDL_PROP_WINDOW_VIVANTE_SURFACE_POINTER                     = "SDL.window.vivante.surface";
+	public const c_char* SDL_PROP_WINDOW_WIN32_HWND_POINTER                          = "SDL.window.win32.hwnd";
+	public const c_char* SDL_PROP_WINDOW_WIN32_HDC_POINTER                           = "SDL.window.win32.hdc";
+	public const c_char* SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER                      = "SDL.window.win32.instance";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER                     = "SDL.window.wayland.display";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER                     = "SDL.window.wayland.surface";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_VIEWPORT_POINTER                    = "SDL.window.wayland.viewport";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_EGL_WINDOW_POINTER                  = "SDL.window.wayland.egl_window";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_XDG_SURFACE_POINTER                 = "SDL.window.wayland.xdg_surface";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_POINTER                = "SDL.window.wayland.xdg_toplevel";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING   = "SDL.window.wayland.xdg_toplevel_export_handle";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_XDG_POPUP_POINTER                   = "SDL.window.wayland.xdg_popup";
+	public const c_char* SDL_PROP_WINDOW_WAYLAND_XDG_POSITIONER_POINTER              = "SDL.window.wayland.xdg_positioner";
+	public const c_char* SDL_PROP_WINDOW_X11_DISPLAY_POINTER                         = "SDL.window.x11.display";
+	public const c_char* SDL_PROP_WINDOW_X11_SCREEN_NUMBER                           = "SDL.window.x11.screen";
+	public const c_char* SDL_PROP_WINDOW_X11_WINDOW_NUMBER                           = "SDL.window.x11.window";
+	public const uint32 SDL_WINDOW_SURFACE_VSYNC_DISABLED = 0;
+	public const uint32 SDL_WINDOW_SURFACE_VSYNC_ADAPTIVE  = uint32(-1);
+
+	public const c_char* SDL_PROP_GLOBAL_VIDEO_WAYLAND_WL_DISPLAY_POINTER = "SDL.video.wayland.wl_display";
+
+	public const uint32 SDL_WINDOWPOS_UNDEFINED_MASK    = 0x1FFF0000;
+
+	public static mixin SDL_WINDOWPOS_UNDEFINED_DISPLAY(SDL_DisplayID X)
+	{
+		(SDL_WINDOWPOS_UNDEFINED_MASK | (X))
+	}
+
+	public static mixin SDL_WINDOWPOS_UNDEFINED()
+	{
+		SDL_WINDOWPOS_UNDEFINED_DISPLAY!(0)
+	}
+
+	public static mixin SDL_WINDOWPOS_ISUNDEFINED(var X)
+	{
+		(((X) & 0xFFFF0000) == SDL_WINDOWPOS_UNDEFINED_MASK)
+	}
+
+	public const uint32 SDL_WINDOWPOS_CENTERED_MASK    = 0x2FFF0000;
+
+	public static mixin SDL_WINDOWPOS_CENTERED_DISPLAY(SDL_DisplayID X)
+	{
+		(SDL_WINDOWPOS_CENTERED_MASK | (X))
+	}
+
+	public static mixin SDL_WINDOWPOS_CENTERED()
+	{
+		SDL_WINDOWPOS_CENTERED_DISPLAY!(0)
+	}
+
+	public static mixin SDL_WINDOWPOS_ISCENTERED(var X)
+	{
+		(((X) & 0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
+	}
+
+	public struct SDL_GLContextState;
+
+	public typealias SDL_GLContext =  SDL_GLContextState*;
+
+	public enum SDL_GLAttr : c_int
+	{
+		SDL_GL_RED_SIZE, /**< the minimum number of bits for the red channel of the color buffer; defaults to 3. */
+		SDL_GL_GREEN_SIZE, /**< the minimum number of bits for the green channel of the color buffer; defaults to 3. */
+		SDL_GL_BLUE_SIZE, /**< the minimum number of bits for the blue channel of the color buffer; defaults to 2. */
+		SDL_GL_ALPHA_SIZE, /**< the minimum number of bits for the alpha channel of the color buffer; defaults to 0. */
+		SDL_GL_BUFFER_SIZE, /**< the minimum number of bits for frame buffer size; defaults to 0. */
+		SDL_GL_DOUBLEBUFFER, /**< whether the output is single or double buffered; defaults to double buffering on. */
+		SDL_GL_DEPTH_SIZE, /**< the minimum number of bits in the depth buffer; defaults to 16. */
+		SDL_GL_STENCIL_SIZE, /**< the minimum number of bits in the stencil buffer; defaults to 0. */
+		SDL_GL_ACCUM_RED_SIZE, /**< the minimum number of bits for the red channel of the accumulation buffer; defaults to 0. */
+		SDL_GL_ACCUM_GREEN_SIZE, /**< the minimum number of bits for the green channel of the accumulation buffer; defaults to 0. */
+		SDL_GL_ACCUM_BLUE_SIZE, /**< the minimum number of bits for the blue channel of the accumulation buffer; defaults to 0. */
+		SDL_GL_ACCUM_ALPHA_SIZE, /**< the minimum number of bits for the alpha channel of the accumulation buffer; defaults to 0. */
+		SDL_GL_STEREO, /**< whether the output is stereo 3D; defaults to off. */
+		SDL_GL_MULTISAMPLEBUFFERS, /**< the number of buffers used for multisample anti-aliasing; defaults to 0. */
+		SDL_GL_MULTISAMPLESAMPLES, /**< the number of samples used around the current pixel used for multisample anti-aliasing. */
+		SDL_GL_ACCELERATED_VISUAL, /**< set to 1 to require hardware acceleration, set to 0 to force software rendering; defaults to allow either. */
+		SDL_GL_RETAINED_BACKING, /**< not used (deprecated). */
+		SDL_GL_CONTEXT_MAJOR_VERSION, /**< OpenGL context major version. */
+		SDL_GL_CONTEXT_MINOR_VERSION, /**< OpenGL context minor version. */
+		SDL_GL_CONTEXT_FLAGS, /**< some combination of 0 or more of elements of the SDL_GLContextFlag enumeration; defaults to 0. */
+		SDL_GL_CONTEXT_PROFILE_MASK, /**< type of GL context (Core, Compatibility, ES). See SDL_GLProfile; default value depends on platform. */
+		SDL_GL_SHARE_WITH_CURRENT_CONTEXT, /**< OpenGL context sharing; defaults to 0. */
+		SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, /**< requests sRGB capable visual; defaults to 0. */
+		SDL_GL_CONTEXT_RELEASE_BEHAVIOR, /**< sets context the release behavior. See SDL_GLContextReleaseFlag; defaults to FLUSH. */
+		SDL_GL_CONTEXT_RESET_NOTIFICATION, /**< set context reset notification. See SDL_GLContextResetNotification; defaults to NO_NOTIFICATION. */
+		SDL_GL_CONTEXT_NO_ERROR,
+		SDL_GL_FLOATBUFFERS,
+		SDL_GL_EGL_PLATFORM
+	}
+
+	public enum SDL_GLProfile : uint32
+	{
+		SDL_GL_CONTEXT_PROFILE_CORE           = 0x0001, /**< OpenGL Core Profile context */
+		SDL_GL_CONTEXT_PROFILE_COMPATIBILITY  = 0x0002, /**< OpenGL Compatibility Profile context */
+		SDL_GL_CONTEXT_PROFILE_ES             = 0x0004, /**< GLX_CONTEXT_ES2_PROFILE_BIT_EXT */
+	}
+
+	public enum SDL_GLContextFlag : uint32
+	{
+		SDL_GL_CONTEXT_DEBUG_FLAG              = 0x0001,
+		SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG = 0x0002,
+		SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG      = 0x0004,
+		SDL_GL_CONTEXT_RESET_ISOLATION_FLAG    = 0x0008,
+	}
+
+	public enum SDL_GLContextReleaseFlag : uint32
+	{
+		SDL_GL_CONTEXT_RELEASE_BEHAVIOR_NONE   = 0x0000,
+		SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH  = 0x0001,
+	}
+
+	public enum SDL_GLContextResetNotification : uint32
+	{
+		SDL_GL_CONTEXT_RESET_NO_NOTIFICATION  = 0x0000,
+		SDL_GL_CONTEXT_RESET_LOSE_CONTEXT     = 0x0001,
 	}
 
 	[CLink] public static extern c_int SDL_GetNumVideoDrivers();
@@ -5696,6 +7255,18 @@ static
 
 	[CLink] public static extern c_bool SDL_GL_DestroyContext(SDL_GLContext context);
 
+	[CLink] public static extern c_bool SDL_GL_SetAttribute(SDL_GLAttr attr, c_int value);
+
+	[CLink] public static extern c_bool SDL_GL_GetAttribute(SDL_GLAttr attr, c_int* value);
+
+	[CLink] public static extern SDL_Window** SDL_GetWindows(int32* count);
+
+
+	
+
+
+	
+
 	//SDL_vulkan.h
 
 	[CRepr]
@@ -5759,13 +7330,6 @@ static
 	{
 		SDL_SCANCODE_UNKNOWN = 0,
 
-		   /**
-			*  \name Usage page 0x07
-			*
-			*  These values are from usage page 0x07 (USB keyboard page).
-			*/
-		   /* @{ */
-
 		SDL_SCANCODE_A = 4,
 		SDL_SCANCODE_B = 5,
 		SDL_SCANCODE_C = 6,
@@ -5814,51 +7378,11 @@ static
 		SDL_SCANCODE_EQUALS = 46,
 		SDL_SCANCODE_LEFTBRACKET = 47,
 		SDL_SCANCODE_RIGHTBRACKET = 48,
-		SDL_SCANCODE_BACKSLASH = 49, /**< Located at the lower left of the return
-										 *   key on ISO keyboards and at the right end
-										 *   of the QWERTY row on ANSI keyboards.
-										 *   Produces REVERSE SOLIDUS (backslash) and
-										 *   VERTICAL LINE in a US layout, REVERSE
-										 *   SOLIDUS and VERTICAL LINE in a UK Mac
-										 *   layout, NUMBER SIGN and TILDE in a UK
-										 *   Windows layout, DOLLAR SIGN and POUND SIGN
-										 *   in a Swiss German layout, NUMBER SIGN and
-										 *   APOSTROPHE in a German layout, GRAVE
-										 *   ACCENT and POUND SIGN in a French Mac
-										 *   layout, and ASTERISK and MICRO SIGN in a
-										 *   French Windows layout.
-										 */
-		SDL_SCANCODE_NONUSHASH = 50, /**< ISO USB keyboards actually use this code
-										 *   instead of 49 for the same key, but all
-										 *   OSes I've seen treat the two codes
-										 *   identically. So, as an implementor, unless
-										 *   your keyboard generates both of those
-										 *   codes and your OS treats them differently,
-										 *   you should generate SDL_SCANCODE_BACKSLASH
-										 *   instead of this code. As a user, you
-										 *   should not rely on this code because SDL
-										 *   will never generate it with most (all?)
-										 *   keyboards.
-										 */
+		SDL_SCANCODE_BACKSLASH = 49,
+		SDL_SCANCODE_NONUSHASH = 50,
 		SDL_SCANCODE_SEMICOLON = 51,
 		SDL_SCANCODE_APOSTROPHE = 52,
-		SDL_SCANCODE_GRAVE = 53, /**< Located in the top left corner (on both ANSI
-									 *   and ISO keyboards). Produces GRAVE ACCENT and
-									 *   TILDE in a US Windows layout and in US and UK
-									 *   Mac layouts on ANSI keyboards, GRAVE ACCENT
-									 *   and NOT SIGN in a UK Windows layout, SECTION
-									 *   SIGN and PLUS-MINUS SIGN in US and UK Mac
-									 *   layouts on ISO keyboards, SECTION SIGN and
-									 *   DEGREE SIGN in a Swiss German layout (Mac:
-									 *   only on ISO keyboards), CIRCUMFLEX ACCENT and
-									 *   DEGREE SIGN in a German layout (Mac: only on
-									 *   ISO keyboards), SUPERSCRIPT TWO and TILDE in a
-									 *   French Windows layout, COMMERCIAL AT and
-									 *   NUMBER SIGN in a French Mac layout on ISO
-									 *   keyboards, and LESS-THAN SIGN and GREATER-THAN
-									 *   SIGN in a Swiss German, German, or French Mac
-									 *   layout on ANSI keyboards.
-									 */
+		SDL_SCANCODE_GRAVE = 53,
 		SDL_SCANCODE_COMMA = 54,
 		SDL_SCANCODE_PERIOD = 55,
 		SDL_SCANCODE_SLASH = 56,
@@ -5881,8 +7405,7 @@ static
 		SDL_SCANCODE_PRINTSCREEN = 70,
 		SDL_SCANCODE_SCROLLLOCK = 71,
 		SDL_SCANCODE_PAUSE = 72,
-		SDL_SCANCODE_INSERT = 73, /**< insert on PC, help on some Mac keyboards (but
-										  does send code 73, not 117) */
+		SDL_SCANCODE_INSERT = 73,
 		SDL_SCANCODE_HOME = 74,
 		SDL_SCANCODE_PAGEUP = 75,
 		SDL_SCANCODE_DELETE = 76,
@@ -5893,8 +7416,7 @@ static
 		SDL_SCANCODE_DOWN = 81,
 		SDL_SCANCODE_UP = 82,
 
-		SDL_SCANCODE_NUMLOCKCLEAR = 83, /**< num lock on PC, clear on Mac keyboards
-											*/
+		SDL_SCANCODE_NUMLOCKCLEAR = 83,
 		SDL_SCANCODE_KP_DIVIDE = 84,
 		SDL_SCANCODE_KP_MULTIPLY = 85,
 		SDL_SCANCODE_KP_MINUS = 86,
@@ -5912,20 +7434,9 @@ static
 		SDL_SCANCODE_KP_0 = 98,
 		SDL_SCANCODE_KP_PERIOD = 99,
 
-		SDL_SCANCODE_NONUSBACKSLASH = 100, /**< This is the additional key that ISO
-											   *   keyboards have over ANSI ones,
-											   *   located between left shift and Y.
-											   *   Produces GRAVE ACCENT and TILDE in a
-											   *   US or UK Mac layout, REVERSE SOLIDUS
-											   *   (backslash) and VERTICAL LINE in a
-											   *   US or UK Windows layout, and
-											   *   LESS-THAN SIGN and GREATER-THAN SIGN
-											   *   in a Swiss German, German, or French
-											   *   layout. */
-		SDL_SCANCODE_APPLICATION = 101, /**< windows contextual menu, compose */
-		SDL_SCANCODE_POWER = 102, /**< The USB document says this is a status flag,
-									  *   not a physical key - but some Mac keyboards
-									  *   do have a power key. */
+		SDL_SCANCODE_NONUSBACKSLASH = 100,
+		SDL_SCANCODE_APPLICATION = 101,
+		SDL_SCANCODE_POWER = 102,
 		SDL_SCANCODE_KP_EQUALS = 103,
 		SDL_SCANCODE_F13 = 104,
 		SDL_SCANCODE_F14 = 105,
@@ -5953,15 +7464,15 @@ static
 		SDL_SCANCODE_MUTE = 127,
 		SDL_SCANCODE_VOLUMEUP = 128,
 		SDL_SCANCODE_VOLUMEDOWN = 129,
-	   /* not sure whether there's a reason to enable these */
-	   /*     SDL_SCANCODE_LOCKINGCAPSLOCK = 130,  */
-	   /*     SDL_SCANCODE_LOCKINGNUMLOCK = 131, */
-	   /*     SDL_SCANCODE_LOCKINGSCROLLLOCK = 132, */
+	/* not sure whether there's a reason to enable these */
+	/*     SDL_SCANCODE_LOCKINGCAPSLOCK = 130,  */
+	/*     SDL_SCANCODE_LOCKINGNUMLOCK = 131, */
+	/*     SDL_SCANCODE_LOCKINGSCROLLLOCK = 132, */
 		SDL_SCANCODE_KP_COMMA = 133,
 		SDL_SCANCODE_KP_EQUALSAS400 = 134,
 
 		SDL_SCANCODE_INTERNATIONAL1 = 135, /**< used on Asian keyboards, see
-												   footnotes in USB doc */
+	footnotes in USB doc */
 		SDL_SCANCODE_INTERNATIONAL2 = 136,
 		SDL_SCANCODE_INTERNATIONAL3 = 137, /**< Yen */
 		SDL_SCANCODE_INTERNATIONAL4 = 138,
@@ -6049,24 +7560,7 @@ static
 		SDL_SCANCODE_RALT = 230, /**< alt gr, option */
 		SDL_SCANCODE_RGUI = 231, /**< windows, command (apple), meta */
 
-		SDL_SCANCODE_MODE = 257, /**< I'm not sure if this is really not covered
-										*   by any of the above, but since there's a
-										*   special SDL_KMOD_MODE for it I'm adding it here
-										*/
-
-		   /* @} */ /* Usage page 0x07 */
-
-		   /**
-			*  \name Usage page 0x0C
-			*
-			*  These values are mapped from usage page 0x0C (USB consumer page).
-			*
-			*  There are way more keys in the spec than we can represent in the
-			*  current scancode range, so pick the ones that commonly come up in
-			*  real world usage.
-			*/
-		   /* @{ */
-
+		SDL_SCANCODE_MODE = 257,
 		SDL_SCANCODE_SLEEP = 258, /**< Sleep */
 		SDL_SCANCODE_WAKE = 259, /**< Wake */
 
@@ -6101,37 +7595,33 @@ static
 		SDL_SCANCODE_AC_REFRESH = 285, /**< AC Refresh */
 		SDL_SCANCODE_AC_BOOKMARKS = 286, /**< AC Bookmarks */
 
-		   /* @} */ /* Usage page 0x0C */
+	/* @} */ /* Usage page 0x0C */
 
 
-		   /**
-			*  \name Mobile keys
-			*
-			*  These are values that are often used on mobile phones.
-			*/
-		   /* @{ */
+	/* @{ */
 
 		SDL_SCANCODE_SOFTLEFT = 287, /**< Usually situated below the display on phones and
-											 used as a multi-function feature key for selecting
-											 a software defined function shown on the bottom left
-											 of the display. */
+										  used as a multi-function feature key for selecting
+										  a software defined function shown on the bottom left
+	of the display. */
 		SDL_SCANCODE_SOFTRIGHT = 288, /**< Usually situated below the display on phones and
-											  used as a multi-function feature key for selecting
-											  a software defined function shown on the bottom right
-											  of the display. */
+										   used as a multi-function feature key for selecting
+										   a software defined function shown on the bottom right
+	of the display. */
 		SDL_SCANCODE_CALL = 289, /**< Used for accepting phone calls. */
 		SDL_SCANCODE_ENDCALL = 290, /**< Used for rejecting phone calls. */
 
-		   /* @} */ /* Mobile keys */
+	/* @} */ /* Mobile keys */
 
-		   /* Add any other keys here. */
+	/* Add any other keys here. */
 
 		SDL_SCANCODE_RESERVED = 400, /**< 400-500 reserved for dynamic keycodes */
 
 		SDL_SCANCODE_COUNT = 512 /**< not a key, just marks the number of scancodes for array bounds */
+
 	}
 
-   //SDL_keycode.h
+	//SDL_keycode.h
 
 	public static SDL_Keycode SDL_Scancode_To_Keycode(SDL_Scancode scancode) => (.)(scancode | (.)(1u << 30));
 
@@ -6413,6 +7903,10 @@ static
 
 	public typealias SDL_PenID = uint32;
 
+	public const uint32 SDL_PEN_MOUSEID = ((SDL_MouseID) - 2);
+
+	public const uint64 SDL_PEN_TOUCHID = ((SDL_TouchID) - 2);
+
 	public enum SDL_PenInputFlags : uint32
 	{
 		SDL_PEN_INPUT_DOWN       = (1u << 0), /**< pen is pressed down */
@@ -6426,13 +7920,13 @@ static
 
 	public enum SDL_PenAxis : c_int
 	{
-		SDL_PEN_AXIS_PRESSURE,  /**< Pen pressure.  Unidirectional: 0 to 1.0 */
-		SDL_PEN_AXIS_XTILT,     /**< Pen horizontal tilt angle.  Bidirectional: -90.0 to 90.0 (left-to-right). */
-		SDL_PEN_AXIS_YTILT,     /**< Pen vertical tilt angle.  Bidirectional: -90.0 to 90.0 (top-to-down). */
-		SDL_PEN_AXIS_DISTANCE,  /**< Pen distance to drawing surface.  Unidirectional: 0.0 to 1.0 */
-		SDL_PEN_AXIS_ROTATION,  /**< Pen barrel rotation.  Bidirectional: -180 to 179.9 (clockwise, 0 is facing up, -180.0 is facing down). */
-		SDL_PEN_AXIS_SLIDER,    /**< Pen finger wheel or slider (e.g., Airbrush Pen).  Unidirectional: 0 to 1.0 */
-		SDL_PEN_AXIS_TANGENTIAL_PRESSURE,    /**< Pressure from squeezing the pen ("barrel pressure"). */
-		SDL_PEN_AXIS_COUNT       /**< Total known pen axis types in this version of SDL. This number may grow in future releases! */
+		SDL_PEN_AXIS_PRESSURE, /**< Pen pressure.  Unidirectional: 0 to 1.0 */
+		SDL_PEN_AXIS_XTILT, /**< Pen horizontal tilt angle.  Bidirectional: -90.0 to 90.0 (left-to-right). */
+		SDL_PEN_AXIS_YTILT, /**< Pen vertical tilt angle.  Bidirectional: -90.0 to 90.0 (top-to-down). */
+		SDL_PEN_AXIS_DISTANCE, /**< Pen distance to drawing surface.  Unidirectional: 0.0 to 1.0 */
+		SDL_PEN_AXIS_ROTATION, /**< Pen barrel rotation.  Bidirectional: -180 to 179.9 (clockwise, 0 is facing up, -180.0 is facing down). */
+		SDL_PEN_AXIS_SLIDER, /**< Pen finger wheel or slider (e.g., Airbrush Pen).  Unidirectional: 0 to 1.0 */
+		SDL_PEN_AXIS_TANGENTIAL_PRESSURE, /**< Pressure from squeezing the pen ("barrel pressure"). */
+		SDL_PEN_AXIS_COUNT /**< Total known pen axis types in this version of SDL. This number may grow in future releases! */
 	}
 }
