@@ -45,9 +45,9 @@ class Program
 				continue;
 
 			if(String.Compare(&stats.mFilename, "SDL3-3.2.4/lib/x64/SDL3.dll".Length, "SDL3-3.2.4/lib/x64/SDL3.dll", "SDL3-3.2.4/lib/x64/SDL3.dll".Length, false) == 0)
-				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.dll", .CompressedData);
+				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.dll", .None);
 			else if(String.Compare(&stats.mFilename, "SDL3-3.2.4/lib/x64/SDL3.lib".Length, "SDL3-3.2.4/lib/x64/SDL3.lib", "SDL3-3.2.4/lib/x64/SDL3.lib".Length, false) == 0)
-				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.lib", .CompressedData);
+				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.lib", .None);
 		}
 
 		MiniZ.ZipReaderEnd(&archive);

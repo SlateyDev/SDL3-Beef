@@ -2800,14 +2800,6 @@ static
 
 	 [CLink] public static extern c_bool SDL_WaitAndAcquireGPUSwapchainTexture(SDL_GPUCommandBuffer* command_buffer, SDL_Window* window, SDL_GPUTexture** swapchain_texture, uint32* swapchain_texture_width, uint32* swapchain_texture_height);
 
-
-#if SDL_PLATFORM_GDK
-
-	 [CLink] public static extern void SDL_GDKSuspendGPU(SDL_GPUDevice *device);
-
-	 [CLink] public static extern void SDL_GDKResumeGPU(SDL_GPUDevice *device);
-#endif
-
 	//SDL_guid.h
 
 	[CRepr]
