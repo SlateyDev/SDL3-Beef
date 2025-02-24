@@ -1,7 +1,10 @@
 namespace Setup;
 
 using System;
+using System.IO;
 using System.Diagnostics;
+
+using MiniZ;
 
 class Program
 {
@@ -9,13 +12,14 @@ class Program
 	{
 		if(AttemptToDownload() case .Ok)
 			return;
+
 	}
 
 	public static Result<void> AttemptToDownload()
 	{
 		ProcessStartInfo info = scope .();
 		info.UseShellExecute = false;
-		info.SetFileNameAndArguments("curl -o sdl3.zip -L https://github.com/libsdl-org/SDL/releases/download/release-3.2.4/SDL3-devel-3.2.4-mingw.zip");
+		info.SetFileNameAndArguments("curl -o sdl3.zip -L https://github.com/libsdl-org/SDL/releases/download/release-3.2.4/SDL3-devel-3.2.4-VC.zip");
 
 		SpawnedProcess p = scope .();
 		if(p.Start(info) case .Err)
@@ -25,6 +29,29 @@ class Program
 
 		if(p.ExitCode != 0)
 			return .Err;
+
+		if(!Directory.Exists("../dist"))
+			if(Directory.CreateDirectory("../dist") case .Err)
+				return .Err;
+
+		MiniZ.ZipArchive archive = .();
+		if(!MiniZ.ZipReaderInitFile(&archive, "sdl3.zip", .CompressedData))
+			return .Err;
+
+		for(int32 i  < (.)MiniZ.ZipReaderGetNumFiles(&archive))
+		{
+			MiniZ.ZipArchiveFileStat stats = .();
+			if(!MiniZ.ZipReaderFileStat(&archive, i, &stats))
+				continue;
+
+			if(String.Compare(&stats.mFilename, "SDL3-3.2.4/lib/x64/SDL3.dll".Length, "SDL3-3.2.4/lib/x64/SDL3.dll", "SDL3-3.2.4/lib/x64/SDL3.dll".Length, false) == 0)
+				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.dll", .CompressedData);
+			else if(String.Compare(&stats.mFilename, "SDL3-3.2.4/lib/x64/SDL3.lib".Length, "SDL3-3.2.4/lib/x64/SDL3.lib", "SDL3-3.2.4/lib/x64/SDL3.lib".Length, false) == 0)
+				MiniZ.ZipReaderExtractToFile(&archive, i, "../dist/SDL3.lib", .CompressedData);
+		}
+
+		MiniZ.ZipReaderEnd(&archive);
+
 		return .Ok;
 	}
 }
