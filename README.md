@@ -5,7 +5,7 @@
 This project is a binding for the SDL3 library to the Beef programming language.  
 It provides one primary binding that aims to be as close as possible to the original library in the `SDL3.Raw` namespace.  
 In the future a more Beef-like binding may be available in a different namespace.  
-Currently it binds the `3.2.4` version of sdl
+Currently it binds the `3.2.14` version of sdl
 
 ## Interface
 
