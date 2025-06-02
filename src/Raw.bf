@@ -6070,15 +6070,11 @@ static
 
 	public static uint32 SDL_clamp(uint32 x, uint32 a, uint32 b) => (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)));
 
-	[CLink] public static extern c_char* SDL_ltoa(int64 value, c_char* str, c_int radix);
-
-	[CLink] public static extern c_char* SDL_ultoa(uint64 value, c_char* str, c_int radix);
-
 #if !SDL_NOLONGLONG
 
-	[CLink] public static extern c_char* SDL_lltoa(int64 value, c_char* str, c_int radix);
+	[CLink] public static extern c_char* SDL_lltoa(c_long value, c_char* str, c_int radix);
 
-	[CLink] public static extern c_char* SDL_ulltoa(uint64 value, c_char* str, c_int radix);
+	[CLink] public static extern c_char* SDL_ulltoa(c_ulong value, c_char* str, c_int radix);
 #endif
 
 #if !SDL_NOLONGLONG
