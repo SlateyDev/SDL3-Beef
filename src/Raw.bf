@@ -4833,7 +4833,7 @@ static
 
 	public static SDL_PixelFormat SDL_DEFINE_PIXELFORMAT(SDL_PixelType type, c_int order, SDL_PackedLayout layout, uint32 bits, uint32 bytes)
 	{
-		return (SDL_PixelFormat)((1 << 28) | (((int32)type) << 24) | ((order) << 20) | (((int32)layout) << 16) | ((bits) << 8) | ((bytes) << 0));
+		return (SDL_PixelFormat)((1 << 28) | (((uint32)type) << 24) | (((uint32)order) << 20) | (((uint32)layout) << 16) | (((uint32)bits) << 8) | ((uint32)bytes));
 	}
 
 	public static c_int SDL_PIXELFLAG(SDL_PixelFormat format)
