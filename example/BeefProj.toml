@@ -7,3 +7,9 @@ StartupObject = "example.Program"
 
 [Configs.Debug.wasm32]
 OtherLinkFlags = "$(LinkFlags) -sUSE_SDL=3 --use-preload-plugins -s INITIAL_MEMORY=67108864 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=1 -s SAFE_HEAP=0 -s DETERMINISTIC=1"
+
+[Configs.Release.wasm32]
+OtherLinkFlags = "$(LinkFlags) -sUSE_SDL=3 --use-preload-plugins -s INITIAL_MEMORY=67108864 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=1 -s SAFE_HEAP=0 -s DETERMINISTIC=1"
+
+[Configs.Test.wasm32]
+OtherLinkFlags = "$(LinkFlags) -sUSE_SDL=3 --use-preload-plugins -s INITIAL_MEMORY=67108864 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=1 -s SAFE_HEAP=0 -s DETERMINISTIC=1"
